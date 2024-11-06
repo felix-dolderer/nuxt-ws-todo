@@ -1,15 +1,10 @@
 <script setup lang="ts">
 import { useWebSocket } from '@vueuse/core';
 import { COMMANDS, taskCommandSchema, taskTopicSchema, TOPICS } from '~/types/ws';
+import type { Task } from '~/types/ws';
 
 const { host } = useRequestURL()
 const { data, close, send } = useWebSocket(`ws://${host}/api/ws/tasks`)
-
-type Task = {
-  id: number
-  title: string
-  done: boolean
-}
 
 const tasks = ref<Task[]>([])
 
