@@ -1,21 +1,17 @@
 import { z } from "zod"
 
-export const TOPICS = Object.freeze({
-  TASKS: Object.freeze({
-    GET: 'tasks',
-    ADD: 'tasks.add',
-    UPDATE: 'tasks.update',
-    DELETE: 'tasks.delete',
-  })
+export const TASK_TOPICS = Object.freeze({
+  GET: 'tasks',
+  ADD: 'tasks.add',
+  UPDATE: 'tasks.update',
+  DELETE: 'tasks.delete',
 })
 
-export const COMMANDS = Object.freeze({
-  TASKS: Object.freeze({
-    GET: 'getTasks',
-    ADD: 'addTask',
-    UPDATE: 'updateTask',
-    DELETE: 'deleteTask',
-  })
+export const TASK_COMMANDS = Object.freeze({
+  GET: 'getTasks',
+  ADD: 'addTask',
+  UPDATE: 'updateTask',
+  DELETE: 'deleteTask',
 })
 
 const taskSchema = z.object({
@@ -29,21 +25,21 @@ const taskIdSchema = taskSchema.pick({ id: true })
 export type TaskId = z.infer<typeof taskIdSchema>
 
 const commandTasksGetSchema = z.object({
-  command: z.literal(COMMANDS.TASKS.GET),
+  command: z.literal(TASK_COMMANDS.GET),
 })
 
 const commandTasksAddSchema = z.object({
-  command: z.literal(COMMANDS.TASKS.ADD),
+  command: z.literal(TASK_COMMANDS.ADD),
   data: taskSchema,
 })
 
 const commandTasksUpdateSchema = z.object({
-  command: z.literal(COMMANDS.TASKS.UPDATE),
+  command: z.literal(TASK_COMMANDS.UPDATE),
   data: taskSchema,
 })
 
 const commandTasksDeleteSchema = z.object({
-  command: z.literal(COMMANDS.TASKS.DELETE),
+  command: z.literal(TASK_COMMANDS.DELETE),
   data: taskIdSchema,
 })
 
@@ -55,22 +51,22 @@ export const taskCommandSchema = z.union([
 ])
 
 const topicTasksGetSchema = z.object({
-  topic: z.literal(TOPICS.TASKS.GET),
+  topic: z.literal(TASK_TOPICS.GET),
   data: z.array(taskSchema),
 })
 
 const topicTasksAddSchema = z.object({
-  topic: z.literal(TOPICS.TASKS.ADD),
+  topic: z.literal(TASK_TOPICS.ADD),
   data: taskSchema,
 })
 
 const topicTasksUpdateSchema = z.object({
-  topic: z.literal(TOPICS.TASKS.UPDATE),
+  topic: z.literal(TASK_TOPICS.UPDATE),
   data: taskSchema,
 })
 
 const topicTasksDeleteSchema = z.object({
-  topic: z.literal(TOPICS.TASKS.DELETE),
+  topic: z.literal(TASK_TOPICS.DELETE),
   data: taskIdSchema,
 })
 

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { useWebSocket } from '@vueuse/core';
-import { COMMANDS, taskCommandSchema, taskTopicSchema, TOPICS } from '~/types/ws';
-import type { Task } from '~/types/ws';
+import { COMMANDS, TOPICS } from '~/schemas';
+import type { Task } from '~/schemas/tasks';
+import { taskCommandSchema, taskTopicSchema } from '~/schemas/tasks';
 
 const { host } = useRequestURL()
 const { data, close, send } = useWebSocket(`ws://${host}/api/ws/tasks`)
