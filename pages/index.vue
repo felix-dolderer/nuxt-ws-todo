@@ -2,7 +2,8 @@
 import { useWebSocket } from '@vueuse/core';
 import { COMMANDS, taskCommandSchema, taskTopicSchema, TOPICS } from '~/types/ws';
 
-const { data, close, send } = useWebSocket('ws://localhost:3000/api/ws/tasks')
+const { host } = useRequestURL()
+const { data, close, send } = useWebSocket(`ws://${host}/api/ws/tasks`)
 
 type Task = {
   id: number
