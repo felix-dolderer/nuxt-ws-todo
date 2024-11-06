@@ -6,7 +6,14 @@ import type { Task } from '~/types/ws';
 const { host } = useRequestURL()
 const { data, close, send } = useWebSocket(`ws://${host}/api/ws/tasks`)
 
+// #region State
+
 const tasks = ref<Task[]>([])
+const newTaskTitle = ref('')
+
+// #endregion State
+
+// #region Watchers
 
 watch(data, () => {
   if (data.value instanceof Blob) {
@@ -31,33 +38,32 @@ watch(data, () => {
   }
 })
 
-onBeforeRouteLeave(() => close())
-onBeforeUnmount(close)
+// #endregion Watchers
 
-const newTaskTitle = ref('')
+// #region Methods
 
 function getNextId() {
   return (tasks.value.map(task => task.id).sort().pop() || 0) + 1
 }
 
-const addTask = () => {
+function addTask() {
   send(JSON.stringify(
     buildTaskCommand(COMMANDS.TASKS.ADD, {
       id: getNextId(),
       title: newTaskTitle.value,
-      done: false
+      done: false,
     })
   ))
   newTaskTitle.value = ''
 }
 
-const toggleTask = ({ id, title, done }: Task) => {
+function toggleTask({ id, title, done }: Task) {
   send(JSON.stringify(
     buildTaskCommand(COMMANDS.TASKS.UPDATE, { id, title, done: !done })
   ))
 }
 
-const deleteTask = ({ id }: Task) => {
+function deleteTask({ id }: Task) {
   send(JSON.stringify(
     buildTaskCommand(COMMANDS.TASKS.DELETE, { id })
   ))
@@ -66,6 +72,15 @@ const deleteTask = ({ id }: Task) => {
 function buildTaskCommand(command: string, data: any) {
   return taskCommandSchema.parse({ command, data })
 }
+
+// #endregion Methods
+
+// #region Lifecycle
+
+onBeforeRouteLeave(() => close())
+onBeforeUnmount(close)
+
+// #endregion Lifecycle
 </script>
 
 <template>
