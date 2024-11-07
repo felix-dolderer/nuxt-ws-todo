@@ -86,7 +86,7 @@ onBeforeUnmount(close)
 
 <template>
   <div>
-    <h1>Tasks</h1>
+    <h1 class="text-4xl font-extrabold">Tasks</h1>
     <div>
       <form @submit.prevent="addTask">
         <input v-model="newTaskTitle" type="text" placeholder="Task title" />
