@@ -1,9 +1,14 @@
 import type { Peer } from "crossws"
 import { z } from "zod"
 import { COMMANDS, TOPICS } from "~/schemas"
-import type { Task, TaskId } from "~/schemas/tasks"
+import type { Task, TaskId, TaskTitle } from "~/schemas/tasks"
 import { taskCommandSchema, taskTopicSchema } from "~/schemas/tasks"
-import { tasks } from "~/server/db/tasks"
+import {
+  dbAddTask,
+  dbDeleteTask,
+  dbGetTasks,
+  dbUpdateTask,
+} from "~/server/db/tasks"
 
 export default defineWebSocketHandler({
   open(peer) {
@@ -28,28 +33,35 @@ export default defineWebSocketHandler({
   },
 })
 
-function getTasks(peer: Peer) {
+async function getTasks(peer: Peer) {
   peer.send({
     topic: TOPICS.TASKS.GET,
-    data: tasks,
+    data: await dbGetTasks(),
   })
 }
 
-function addTask(peer: Peer, task: Task) {
-  tasks.push(task)
-  publishTaskMessage({ topic: TOPICS.TASKS.ADD, data: task }, peer)
+async function addTask(peer: Peer, { title }: TaskTitle) {
+  const addedTask = await dbAddTask(title)
+  if (!addedTask) {
+    return
+  }
+  publishTaskMessage({ topic: TOPICS.TASKS.ADD, data: addedTask }, peer)
 }
 
-function updateTask(peer: Peer, task: Task) {
-  const indexToUpdate = tasks.findIndex((t) => t.id === task.id)
-  tasks[indexToUpdate] = task
-  publishTaskMessage({ topic: TOPICS.TASKS.UPDATE, data: task }, peer)
+async function updateTask(peer: Peer, task: Task) {
+  const updatedTask = await dbUpdateTask(task)
+  if (!updatedTask) {
+    return
+  }
+  publishTaskMessage({ topic: TOPICS.TASKS.UPDATE, data: updatedTask }, peer)
 }
 
-function deleteTask(peer: Peer, task: TaskId) {
-  const indexToDelete = tasks.findIndex((t) => t.id === task.id)
-  tasks.splice(indexToDelete, 1)
-  publishTaskMessage({ topic: TOPICS.TASKS.DELETE, data: task }, peer)
+async function deleteTask(peer: Peer, { id }: TaskId) {
+  const deletedTask = await dbDeleteTask(id)
+  if (!deletedTask) {
+    return
+  }
+  publishTaskMessage({ topic: TOPICS.TASKS.DELETE, data: deletedTask }, peer)
 }
 
 function publishTaskMessage(

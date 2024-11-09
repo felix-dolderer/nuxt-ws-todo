@@ -46,21 +46,12 @@ watch(data, () => {
 
 // #region Methods
 
-function getNextId() {
-  return (
-    (tasks.value
-      .map((task) => task.id)
-      .sort()
-      .pop() || 0) + 1
-  )
-}
-
 function addTask() {
   send(
     JSON.stringify(
       buildTaskCommand({
         command: COMMANDS.TASKS.ADD,
-        data: { id: getNextId(), title: newTask.value.title, done: false },
+        data: newTask.value,
       }),
     ),
   )
