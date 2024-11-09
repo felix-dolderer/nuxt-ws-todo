@@ -1,7 +1,8 @@
 {
   "name": "nuxt-app",
   "dependencies": {
-    "@nuxt/ui": "^2.19.2",
+    "@iconify-json/lucide": "^1.2.12",
+    "@nuxt/ui": "^3.0.0-alpha.8",
     "@vueuse/core": "^11.2.0",
     "nuxt": "^3.14.159",
     "vue": "latest",
@@ -16,5 +17,11 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
   },
-  "type": "module"
+  "type": "module",
+  "trustedDependencies": [
+    "@parcel/watcher"
+  ],
+  "devDependencies": {
+    "prettier": "^3.3.3"
+  }
 }

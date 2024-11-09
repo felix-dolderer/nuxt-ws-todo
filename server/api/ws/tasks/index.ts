@@ -37,33 +37,24 @@ function getTasks(peer: Peer) {
 
 function addTask(peer: Peer, task: Task) {
   tasks.push(task)
-  publishTaskMessage({
-    topic: TOPICS.TASKS.ADD,
-    data: task,
-  }, peer)
+  publishTaskMessage({ topic: TOPICS.TASKS.ADD, data: task }, peer)
 }
 
 function updateTask(peer: Peer, task: Task) {
   const indexToUpdate = tasks.findIndex((t) => t.id === task.id)
   tasks[indexToUpdate] = task
-  publishTaskMessage({
-    topic: TOPICS.TASKS.UPDATE,
-    data: task,
-  }, peer)
+  publishTaskMessage({ topic: TOPICS.TASKS.UPDATE, data: task }, peer)
 }
 
 function deleteTask(peer: Peer, task: TaskId) {
   const indexToDelete = tasks.findIndex((t) => t.id === task.id)
   tasks.splice(indexToDelete, 1)
-  publishTaskMessage({
-    topic: TOPICS.TASKS.DELETE,
-    data: task,
-  }, peer)
+  publishTaskMessage({ topic: TOPICS.TASKS.DELETE, data: task }, peer)
 }
 
 function publishTaskMessage(
   message: z.infer<typeof taskTopicSchema>,
-  peer: Peer
+  peer: Peer,
 ) {
   peer.send(message)
   peer.publish(TOPICS.TASKS.GET, message)

@@ -1,17 +1,17 @@
 import { z } from "zod"
 
 export const TASK_TOPICS = Object.freeze({
-  GET: 'tasks',
-  ADD: 'tasks.add',
-  UPDATE: 'tasks.update',
-  DELETE: 'tasks.delete',
+  GET: "tasks",
+  ADD: "tasks.add",
+  UPDATE: "tasks.update",
+  DELETE: "tasks.delete",
 })
 
 export const TASK_COMMANDS = Object.freeze({
-  GET: 'getTasks',
-  ADD: 'addTask',
-  UPDATE: 'updateTask',
-  DELETE: 'deleteTask',
+  GET: "getTasks",
+  ADD: "addTask",
+  UPDATE: "updateTask",
+  DELETE: "deleteTask",
 })
 
 const taskSchema = z.object({
