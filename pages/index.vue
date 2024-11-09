@@ -13,7 +13,24 @@ const { data, close, send } = useWebSocket(`ws://${host}/api/ws/tasks`)
 const tasks = ref<Task[]>([])
 const newTask = ref<Task>({ id: 0, title: "", done: false })
 
+const statusFilterOptions = ["Open", "Done", "All"]
+const statusFilter = ref("Open")
+
 // #endregion State
+
+// #region Computed
+
+const filteredTasks = computed(() => {
+  if (statusFilter.value === "Open") {
+    return tasks.value.filter((task) => !task.done)
+  } else if (statusFilter.value === "Done") {
+    return tasks.value.filter((task) => task.done)
+  } else {
+    return tasks.value
+  }
+})
+
+// #endregion Computed
 
 // #region Watchers
 
@@ -116,9 +133,17 @@ onBeforeUnmount(close)
         </UButton>
       </UButtonGroup>
     </form>
+    <div class="block h-8">
+      <USelect
+        v-model="statusFilter"
+        icon="i-lucide-filter"
+        :items="statusFilterOptions"
+        class="w-48 float-right block clear-both"
+      />
+    </div>
     <div>
       <UCard
-        v-for="task in tasks"
+        v-for="task in filteredTasks"
         :key="task.title"
         class="flex my-2"
         :ui="{ body: 'p-4 sm:p-6 flex flex-1 flex-wrap' }"
