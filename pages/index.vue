@@ -1,112 +1,25 @@
 <script setup lang="ts">
-import type { TableColumn } from "@nuxt/ui"
+// #region Imports
+
 import { useWebSocket } from "@vueuse/core"
-import { z } from "zod"
+import type { z } from "zod"
 import { COMMANDS, TOPICS } from "~/schemas"
 import type { Task } from "~/schemas/tasks"
 import { taskCommandSchema, taskTopicSchema } from "~/schemas/tasks"
 
-const UButton = resolveComponent("UButton")
-
-const { host } = useRequestURL()
-const { data, close, send } = useWebSocket(`ws://${host}/api/ws/tasks`)
+// #endregion Imports
 
 // #region State
 
 const tasks = ref<Task[]>([])
 const newTask = ref<Task>({ id: 0, title: "", done: false })
 
-const statusFilterOptions = ["Open", "Done", "All"]
-const statusFilter = ref("Open")
-
 // #endregion State
 
-// #region Table
+// #region WebSockets
 
-const tasksUTable = useTemplateRef("tasksUTable")
-
-const sortedColumnHeader: TableColumn<Task>["header"] = ({ column }) => {
-  const isSorted = column.getIsSorted()
-
-  return h(UButton, {
-    color: "neutral",
-    variant: "ghost",
-    label: column.id,
-    icon: isSorted
-      ? isSorted === "asc"
-        ? "i-lucide-arrow-up-narrow-wide"
-        : "i-lucide-arrow-down-wide-narrow"
-      : "i-lucide-arrow-up-down",
-    class: "-mx-2.5",
-    onClick: () => column.toggleSorting(column.getIsSorted() === "asc"),
-  })
-}
-
-const columns: TableColumn<Task>[] = [
-  {
-    accessorKey: "id",
-    header: sortedColumnHeader,
-  },
-  { accessorKey: "title", id: "Title", header: sortedColumnHeader },
-  {
-    accessorKey: "done",
-    header: "",
-    filterFn: (row, _, desiredStatus) => {
-      const { done } = row.original
-      if (desiredStatus === "Open") {
-        return !done
-      } else if (desiredStatus === "Done") {
-        return done
-      } else {
-        return true
-      }
-    },
-    cell: ({ row }) => {
-      const task = row.original
-
-      const done = task.done
-      const color = done ? "warning" : "success"
-      const icon = done
-        ? "i-lucide-archive-restore"
-        : "i-lucide-circle-check-big"
-      const text = done ? "Restore" : "Complete"
-
-      return h(
-        UButton,
-        { variant: "subtle", color, icon, onClick: () => toggleTask(task) },
-        () => text,
-      )
-    },
-  },
-  {
-    accessorKey: "id",
-    header: "",
-    cell: ({ row }) => {
-      const task = row.original
-
-      return h(
-        UButton,
-        {
-          variant: "subtle",
-          color: "error",
-          icon: "i-lucide-trash",
-          onClick: () => deleteTask(task),
-        },
-        () => "Delete",
-      )
-    },
-  },
-]
-
-const sorting = ref([{ id: "id", desc: false }])
-
-const columnFilters = computed(() => [
-  { id: "done", value: statusFilter.value },
-])
-
-// #endregion Table
-
-// #region Watchers
+const { host } = useRequestURL()
+const { data, close, send } = useWebSocket(`ws://${host}/api/ws/tasks`)
 
 watch(data, () => {
   if (!(data.value instanceof Blob)) return
@@ -134,17 +47,14 @@ watch(data, () => {
   reader.readAsText(data.value)
 })
 
-// #endregion Watchers
+// #endregion WebSockets
 
 // #region Methods
 
 function addTask() {
   send(
     JSON.stringify(
-      buildTaskCommand({
-        command: COMMANDS.TASKS.ADD,
-        data: newTask.value,
-      }),
+      _buildTaskCommand({ command: COMMANDS.TASKS.ADD, data: newTask.value }),
     ),
   )
   newTask.value.title = ""
@@ -153,7 +63,7 @@ function addTask() {
 function toggleTask({ id, title, done }: Task) {
   send(
     JSON.stringify(
-      buildTaskCommand({
+      _buildTaskCommand({
         command: COMMANDS.TASKS.UPDATE,
         data: { id, title, done: !done },
       }),
@@ -164,15 +74,12 @@ function toggleTask({ id, title, done }: Task) {
 function deleteTask({ id }: Task) {
   send(
     JSON.stringify(
-      buildTaskCommand({
-        command: COMMANDS.TASKS.DELETE,
-        data: { id },
-      }),
+      _buildTaskCommand({ command: COMMANDS.TASKS.DELETE, data: { id } }),
     ),
   )
 }
 
-function buildTaskCommand(taskCommand: z.infer<typeof taskCommandSchema>) {
+function _buildTaskCommand(taskCommand: z.infer<typeof taskCommandSchema>) {
   return taskCommandSchema.parse(taskCommand)
 }
 
@@ -203,26 +110,16 @@ onBeforeUnmount(close)
         <UButton
           type="submit"
           color="neutral"
+          variant="subtle"
         >
-          Add task
+          Add Task
         </UButton>
       </UButtonGroup>
     </form>
-    <div class="block h-8">
-      <USelect
-        v-model="statusFilter"
-        icon="i-lucide-filter"
-        :items="statusFilterOptions"
-        class="w-48 float-right block clear-both"
-      />
-    </div>
-    <UTable
-      ref="tasksUTable"
-      :data="tasks"
-      :columns="columns"
-      v-model:sorting="sorting"
-      v-model:column-filters="columnFilters"
-      class="flex-1"
+    <TasksTable
+      :tasks="tasks"
+      @delete-task="deleteTask"
+      @toggle-task="toggleTask"
     />
   </div>
 </template>
