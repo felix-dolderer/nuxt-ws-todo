@@ -1,9 +1,12 @@
 <script setup lang="ts">
+import type { TableColumn } from "@nuxt/ui"
 import { useWebSocket } from "@vueuse/core"
-import type { z } from "zod"
+import { z } from "zod"
 import { COMMANDS, TOPICS } from "~/schemas"
 import type { Task } from "~/schemas/tasks"
 import { taskCommandSchema, taskTopicSchema } from "~/schemas/tasks"
+
+const UButton = resolveComponent("UButton")
 
 const { host } = useRequestURL()
 const { data, close, send } = useWebSocket(`ws://${host}/api/ws/tasks`)
@@ -18,45 +21,117 @@ const statusFilter = ref("Open")
 
 // #endregion State
 
-// #region Computed
+// #region Table
 
-const filteredTasks = computed(() => {
-  if (statusFilter.value === "Open") {
-    return tasks.value.filter((task) => !task.done)
-  } else if (statusFilter.value === "Done") {
-    return tasks.value.filter((task) => task.done)
-  } else {
-    return tasks.value
-  }
-})
+const tasksUTable = useTemplateRef("tasksUTable")
 
-// #endregion Computed
+const sortedColumnHeader: TableColumn<Task>["header"] = ({ column }) => {
+  const isSorted = column.getIsSorted()
+
+  return h(UButton, {
+    color: "neutral",
+    variant: "ghost",
+    label: column.id,
+    icon: isSorted
+      ? isSorted === "asc"
+        ? "i-lucide-arrow-up-narrow-wide"
+        : "i-lucide-arrow-down-wide-narrow"
+      : "i-lucide-arrow-up-down",
+    class: "-mx-2.5",
+    onClick: () => column.toggleSorting(column.getIsSorted() === "asc"),
+  })
+}
+
+const columns: TableColumn<Task>[] = [
+  {
+    accessorKey: "id",
+    header: sortedColumnHeader,
+  },
+  { accessorKey: "title", id: "Title", header: sortedColumnHeader },
+  {
+    accessorKey: "done",
+    header: "",
+    filterFn: (row, _, desiredStatus) => {
+      const { done } = row.original
+      if (desiredStatus === "Open") {
+        return !done
+      } else if (desiredStatus === "Done") {
+        return done
+      } else {
+        return true
+      }
+    },
+    cell: ({ row }) => {
+      const task = row.original
+
+      const done = task.done
+      const color = done ? "warning" : "success"
+      const icon = done
+        ? "i-lucide-archive-restore"
+        : "i-lucide-circle-check-big"
+      const text = done ? "Restore" : "Complete"
+
+      return h(
+        UButton,
+        { variant: "subtle", color, icon, onClick: () => toggleTask(task) },
+        () => text,
+      )
+    },
+  },
+  {
+    accessorKey: "id",
+    header: "",
+    cell: ({ row }) => {
+      const task = row.original
+
+      return h(
+        UButton,
+        {
+          variant: "subtle",
+          color: "error",
+          icon: "i-lucide-trash",
+          onClick: () => deleteTask(task),
+        },
+        () => "Delete",
+      )
+    },
+  },
+]
+
+const sorting = ref([{ id: "id", desc: false }])
+
+const columnFilters = computed(() => [
+  { id: "done", value: statusFilter.value },
+])
+
+// #endregion Table
 
 // #region Watchers
 
 watch(data, () => {
-  if (data.value instanceof Blob) {
-    const reader = new FileReader()
-    reader.onload = () => {
-      const msgOptional = taskTopicSchema.safeParse(
-        JSON.parse(reader.result?.toString() || ""),
-      )
-      if (!msgOptional.success) return
-      const msg = msgOptional.data
+  if (!(data.value instanceof Blob)) return
 
-      if (msg.topic === TOPICS.TASKS.GET) {
-        tasks.value = msg.data
-      } else if (msg.topic === TOPICS.TASKS.ADD) {
-        tasks.value.push(msg.data)
-      } else if (msg.topic === TOPICS.TASKS.UPDATE) {
-        const idx = tasks.value.findIndex((task) => task.id === msg.data.id)
-        tasks.value[idx] = msg.data
-      } else if (msg.topic === TOPICS.TASKS.DELETE) {
-        tasks.value = tasks.value.filter((task) => task.id !== msg.data.id)
-      }
+  const reader = new FileReader()
+  reader.onload = () => {
+    const msgOptional = taskTopicSchema.safeParse(
+      JSON.parse(reader.result?.toString() || ""),
+    )
+    if (!msgOptional.success) return
+    const msg = msgOptional.data
+
+    if (msg.topic === TOPICS.TASKS.GET) {
+      tasks.value = msg.data
+    } else if (msg.topic === TOPICS.TASKS.ADD) {
+      tasks.value = [...tasks.value, msg.data]
+    } else if (msg.topic === TOPICS.TASKS.UPDATE) {
+      tasks.value = tasks.value.map((task) =>
+        task.id === msg.data.id ? msg.data : task,
+      )
+    } else if (msg.topic === TOPICS.TASKS.DELETE) {
+      tasks.value = tasks.value.filter((task) => task.id !== msg.data.id)
     }
-    reader.readAsText(data.value)
   }
+  reader.readAsText(data.value)
 })
 
 // #endregion Watchers
@@ -80,7 +155,7 @@ function toggleTask({ id, title, done }: Task) {
     JSON.stringify(
       buildTaskCommand({
         command: COMMANDS.TASKS.UPDATE,
-        data: { id, title, done },
+        data: { id, title, done: !done },
       }),
     ),
   )
@@ -141,31 +216,13 @@ onBeforeUnmount(close)
         class="w-48 float-right block clear-both"
       />
     </div>
-    <div>
-      <UCard
-        v-for="task in filteredTasks"
-        :key="task.title"
-        class="flex my-2"
-        :ui="{ body: 'p-4 sm:p-6 flex flex-1 flex-wrap' }"
-      >
-        <UCheckbox
-          v-model="task.done"
-          class="flex-1 py-1.5"
-          @click="() => toggleTask(task)"
-        >
-          <template #label>
-            <template v-if="!task.done">{{ task.title }}</template>
-            <del v-else>{{ task.title }}</del>
-          </template>
-        </UCheckbox>
-        <UButton
-          v-if="task.done"
-          color="error"
-          icon="i-lucide-trash-2"
-          label="Delete Task"
-          @click="() => deleteTask(task)"
-        />
-      </UCard>
-    </div>
+    <UTable
+      ref="tasksUTable"
+      :data="tasks"
+      :columns="columns"
+      v-model:sorting="sorting"
+      v-model:column-filters="columnFilters"
+      class="flex-1"
+    />
   </div>
 </template>

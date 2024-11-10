@@ -3,6 +3,8 @@
   "extends": "./.nuxt/tsconfig.json",
   "compilerOptions": {
     "target": "ESNext",
-    "noUncheckedIndexedAccess": true
+    "noImplicitAny": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true
   }
 }
