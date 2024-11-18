@@ -2,8 +2,9 @@
 // #region Imports
 
 import type { TableColumn } from "@nuxt/ui"
-import type { Task } from "~/schemas/tasks"
+import type { Task } from "~~/schemas/tasks"
 
+const TaskDetails = resolveComponent("TaskDetails")
 const UButton = resolveComponent("UButton")
 
 // #endregion Imports
@@ -28,8 +29,6 @@ const statusFilter = ref("Open")
 
 // #region Table
 
-const tasksUTable = useTemplateRef("tasksUTable")
-
 const sortedColumnHeader: TableColumn<Task>["header"] = ({ column }) => {
   const isSorted = column.getIsSorted()
 
@@ -52,7 +51,12 @@ const columns: TableColumn<Task>[] = [
     accessorKey: "id",
     header: sortedColumnHeader,
   },
-  { accessorKey: "title", id: "Title", header: sortedColumnHeader },
+  {
+    accessorKey: "title",
+    id: "Title",
+    header: sortedColumnHeader,
+    cell: ({ row }) => h(TaskDetails, { task: row.original }),
+  },
   {
     accessorKey: "done",
     header: "",
