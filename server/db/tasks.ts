@@ -1,4 +1,4 @@
-import type { Task } from "~/schemas/tasks"
+import type { Task } from "~~/schemas/tasks"
 import { tasksTable } from "./schema"
 import { db } from "./connection"
 import { eq } from "drizzle-orm"

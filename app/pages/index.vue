@@ -12,7 +12,7 @@ import { taskCommandSchema, taskTopicSchema } from "~~/schemas/tasks"
 // #region State
 
 const tasks = ref<Task[]>([])
-const newTask = ref<Task>({ id: 0, title: "", done: false })
+const newTask = ref<Task>({ id: 0, title: "", done: false, parentTaskId: null })
 
 // #endregion State
 
@@ -60,12 +60,12 @@ function addTask() {
   newTask.value.title = ""
 }
 
-function toggleTask({ id, title, done }: Task) {
+function toggleTask(task: Task) {
   send(
     JSON.stringify(
       _buildTaskCommand({
         command: COMMANDS.TASKS.UPDATE,
-        data: { id, title, done: !done },
+        data: { ...task, done: !task.done },
       }),
     ),
   )

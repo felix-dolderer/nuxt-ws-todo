@@ -18,6 +18,7 @@ const taskSchema = z.object({
   id: z.number(),
   title: z.string().min(2).max(255),
   done: z.boolean(),
+  parentTaskId: z.number().nullable(),
 })
 export type Task = z.infer<typeof taskSchema>
 

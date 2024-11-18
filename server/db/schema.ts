@@ -1,7 +1,25 @@
-import { boolean, integer, pgTable, varchar } from "drizzle-orm/pg-core"
+import {
+  boolean,
+  foreignKey,
+  integer,
+  pgTable,
+  varchar,
+} from "drizzle-orm/pg-core"
 
-export const tasksTable = pgTable("tasks", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  title: varchar({ length: 255 }).notNull(),
-  done: boolean().notNull().default(false),
-})
+export const tasksTable = pgTable(
+  "tasks",
+  {
+    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    title: varchar({ length: 255 }).notNull(),
+    done: boolean().notNull().default(false),
+    parentTaskId: integer(),
+  },
+  (t) => [
+    {
+      parentTask: foreignKey({
+        columns: [t.parentTaskId],
+        foreignColumns: [t.id],
+      }),
+    },
+  ],
+)

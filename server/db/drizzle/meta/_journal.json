@@ -8,6 +8,13 @@
       "when": 1731116516877,
       "tag": "0000_curved_proemial_gods",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1731943260860,
+      "tag": "0001_silly_gateway",
+      "breakpoints": true
     }
   ]
 }
