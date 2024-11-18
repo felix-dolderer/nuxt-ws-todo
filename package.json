@@ -1,10 +1,10 @@
 {
   "name": "nuxt-app",
   "dependencies": {
-    "@iconify-json/lucide": "^1.2.12",
+    "@iconify-json/lucide": "^1.2.15",
     "@nuxt/ui": "^3.0.0-alpha.8",
     "@vueuse/core": "^11.2.0",
-    "drizzle-orm": "^0.36.1",
+    "drizzle-orm": "^0.36.3",
     "nuxt": "^3.14.159",
     "pg": "^8.13.1",
     "vue": "latest",
@@ -27,7 +27,7 @@
   ],
   "devDependencies": {
     "@types/pg": "^8.11.10",
-    "drizzle-kit": "^0.28.0",
+    "drizzle-kit": "^0.28.1",
     "prettier": "^3.3.3",
     "tsx": "^4.19.2"
   }
