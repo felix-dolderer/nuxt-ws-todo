@@ -3,9 +3,9 @@
 
 import { useWebSocket } from "@vueuse/core"
 import type { z } from "zod"
-import { COMMANDS, TOPICS } from "~/schemas"
-import type { Task } from "~/schemas/tasks"
-import { taskCommandSchema, taskTopicSchema } from "~/schemas/tasks"
+import { COMMANDS, TOPICS } from "~~/schemas"
+import type { Task } from "~~/schemas/tasks"
+import { taskCommandSchema, taskTopicSchema } from "~~/schemas/tasks"
 
 // #endregion Imports
 

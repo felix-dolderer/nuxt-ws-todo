@@ -1,14 +1,14 @@
 import type { Peer } from "crossws"
 import { z } from "zod"
-import { COMMANDS, TOPICS } from "~/schemas"
-import type { Task, TaskId, TaskTitle } from "~/schemas/tasks"
-import { taskCommandSchema, taskTopicSchema } from "~/schemas/tasks"
+import { COMMANDS, TOPICS } from "~~/schemas"
+import type { Task, TaskId, TaskTitle } from "~~/schemas/tasks"
+import { taskCommandSchema, taskTopicSchema } from "~~/schemas/tasks"
 import {
   dbAddTask,
   dbDeleteTask,
   dbGetTasks,
   dbUpdateTask,
-} from "~/server/db/tasks"
+} from "~~/server/db/tasks"
 
 export default defineWebSocketHandler({
   open(peer) {
