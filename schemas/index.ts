@@ -1,9 +1,9 @@
-import { TASK_COMMANDS, TASK_TOPICS } from "./tasks"
+import { TASKS_COMMANDS, TASKS_TOPICS } from "./tasks"
 
 export const TOPICS = Object.freeze({
-  TASKS: TASK_TOPICS,
+  TASKS: TASKS_TOPICS,
 })
 
 export const COMMANDS = Object.freeze({
-  TASKS: TASK_COMMANDS,
+  TASKS: TASKS_COMMANDS,
 })

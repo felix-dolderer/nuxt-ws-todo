@@ -1,13 +1,13 @@
 import { z } from "zod"
 
-export const TASK_TOPICS = Object.freeze({
+export const TASKS_TOPICS = Object.freeze({
   GET: "tasks",
   ADD: "tasks.add",
   UPDATE: "tasks.update",
   DELETE: "tasks.delete",
 })
 
-export const TASK_COMMANDS = Object.freeze({
+export const TASKS_COMMANDS = Object.freeze({
   GET: "getTasks",
   ADD: "addTask",
   UPDATE: "updateTask",
@@ -29,25 +29,25 @@ const taskTitleSchema = taskSchema.pick({ title: true })
 export type TaskTitle = z.infer<typeof taskTitleSchema>
 
 const commandTasksGetSchema = z.object({
-  command: z.literal(TASK_COMMANDS.GET),
+  command: z.literal(TASKS_COMMANDS.GET),
 })
 
 const commandTasksAddSchema = z.object({
-  command: z.literal(TASK_COMMANDS.ADD),
+  command: z.literal(TASKS_COMMANDS.ADD),
   data: taskTitleSchema,
 })
 
 const commandTasksUpdateSchema = z.object({
-  command: z.literal(TASK_COMMANDS.UPDATE),
+  command: z.literal(TASKS_COMMANDS.UPDATE),
   data: taskSchema,
 })
 
 const commandTasksDeleteSchema = z.object({
-  command: z.literal(TASK_COMMANDS.DELETE),
+  command: z.literal(TASKS_COMMANDS.DELETE),
   data: taskIdSchema,
 })
 
-export const taskCommandSchema = z.union([
+export const tasksCommandSchema = z.union([
   commandTasksGetSchema,
   commandTasksAddSchema,
   commandTasksUpdateSchema,
@@ -55,26 +55,26 @@ export const taskCommandSchema = z.union([
 ])
 
 const topicTasksGetSchema = z.object({
-  topic: z.literal(TASK_TOPICS.GET),
+  topic: z.literal(TASKS_TOPICS.GET),
   data: z.array(taskSchema),
 })
 
 const topicTasksAddSchema = z.object({
-  topic: z.literal(TASK_TOPICS.ADD),
+  topic: z.literal(TASKS_TOPICS.ADD),
   data: taskSchema,
 })
 
 const topicTasksUpdateSchema = z.object({
-  topic: z.literal(TASK_TOPICS.UPDATE),
+  topic: z.literal(TASKS_TOPICS.UPDATE),
   data: taskSchema,
 })
 
 const topicTasksDeleteSchema = z.object({
-  topic: z.literal(TASK_TOPICS.DELETE),
+  topic: z.literal(TASKS_TOPICS.DELETE),
   data: taskIdSchema,
 })
 
-export const taskTopicSchema = z.union([
+export const tasksTopicSchema = z.union([
   topicTasksGetSchema,
   topicTasksAddSchema,
   topicTasksUpdateSchema,

@@ -2,7 +2,7 @@ import type { Peer } from "crossws"
 import { z } from "zod"
 import { COMMANDS, TOPICS } from "~~/schemas"
 import type { Task, TaskId, TaskTitle } from "~~/schemas/tasks"
-import { taskCommandSchema, taskTopicSchema } from "~~/schemas/tasks"
+import { tasksCommandSchema, tasksTopicSchema } from "~~/schemas/tasks"
 import {
   dbAddTask,
   dbDeleteTask,
@@ -16,7 +16,7 @@ export default defineWebSocketHandler({
     getTasks(peer)
   },
   message(peer, rawMessage) {
-    const message = taskCommandSchema.parse(rawMessage.json())
+    const message = tasksCommandSchema.parse(rawMessage.json())
     const { command } = message
     if (command === COMMANDS.TASKS.GET) {
       getTasks(peer)
@@ -65,7 +65,7 @@ async function deleteTask(peer: Peer, { id }: TaskId) {
 }
 
 function publishTaskMessage(
-  message: z.infer<typeof taskTopicSchema>,
+  message: z.infer<typeof tasksTopicSchema>,
   peer: Peer,
 ) {
   peer.send(message)

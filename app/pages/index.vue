@@ -5,7 +5,7 @@ import { useWebSocket } from "@vueuse/core"
 import type { z } from "zod"
 import { COMMANDS, TOPICS } from "~~/schemas"
 import type { Task } from "~~/schemas/tasks"
-import { taskCommandSchema, taskTopicSchema } from "~~/schemas/tasks"
+import { tasksCommandSchema, tasksTopicSchema } from "~~/schemas/tasks"
 
 // #endregion Imports
 
@@ -26,7 +26,7 @@ watch(data, () => {
 
   const reader = new FileReader()
   reader.onload = () => {
-    const msgOptional = taskTopicSchema.safeParse(
+    const msgOptional = tasksTopicSchema.safeParse(
       JSON.parse(reader.result?.toString() || ""),
     )
     if (!msgOptional.success) return
@@ -54,7 +54,7 @@ watch(data, () => {
 function addTask() {
   send(
     JSON.stringify(
-      _buildTaskCommand({ command: COMMANDS.TASKS.ADD, data: newTask.value }),
+      _buildTasksCommand({ command: COMMANDS.TASKS.ADD, data: newTask.value }),
     ),
   )
   newTask.value.title = ""
@@ -63,7 +63,7 @@ function addTask() {
 function toggleTask(task: Task) {
   send(
     JSON.stringify(
-      _buildTaskCommand({
+      _buildTasksCommand({
         command: COMMANDS.TASKS.UPDATE,
         data: { ...task, done: !task.done },
       }),
@@ -74,13 +74,13 @@ function toggleTask(task: Task) {
 function deleteTask({ id }: Task) {
   send(
     JSON.stringify(
-      _buildTaskCommand({ command: COMMANDS.TASKS.DELETE, data: { id } }),
+      _buildTasksCommand({ command: COMMANDS.TASKS.DELETE, data: { id } }),
     ),
   )
 }
 
-function _buildTaskCommand(taskCommand: z.infer<typeof taskCommandSchema>) {
-  return taskCommandSchema.parse(taskCommand)
+function _buildTasksCommand(taskCommand: z.infer<typeof tasksCommandSchema>) {
+  return tasksCommandSchema.parse(taskCommand)
 }
 
 // #endregion Methods
