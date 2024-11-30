@@ -24,7 +24,7 @@ Make sure to install dependencies:
 bun install
 ```
 
-Create the .env file and add your [PostgreSQL](https://www.postgresql.org/download/) connection as `DATABASE_UR`
+Create the .env file and add your [PostgreSQL](https://www.postgresql.org/download/) connection as `NUXT_DB_URL`
 
 ```bash
 cp .env.example .env

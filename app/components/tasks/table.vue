@@ -4,7 +4,6 @@
 import type { TableColumn } from "@nuxt/ui"
 import type { Task } from "~~/schemas/tasks"
 
-const TaskDetails = resolveComponent("TaskDetails")
 const UButton = resolveComponent("UButton")
 
 // #endregion Imports
@@ -55,7 +54,15 @@ const columns: TableColumn<Task>[] = [
     accessorKey: "title",
     id: "Title",
     header: sortedColumnHeader,
-    cell: ({ row }) => h(TaskDetails, { task: row.original }),
+    cell: ({ row }) => h(
+      UButton,
+      { 
+        variant: 'ghost',
+        color: 'neutral',
+        to: { name: 'tasks-taskId', params: { taskId: row.original.id } }
+      },
+      () => row.original.title
+    ),
   },
   {
     accessorKey: "done",
@@ -131,13 +138,15 @@ const columnFilters = computed(() => [
         class="w-48 float-right block clear-both"
       />
     </div>
-    <UTable
-      ref="tasksUTable"
-      :data="tasks"
-      :columns="columns"
-      v-model:sorting="sorting"
-      v-model:column-filters="columnFilters"
-      class="flex-1"
-    />
+    <ClientOnly>
+      <UTable
+        ref="tasksUTable"
+        :data="tasks"
+        :columns="columns"
+        v-model:sorting="sorting"
+        v-model:column-filters="columnFilters"
+        class="flex-1"
+      />
+    </ClientOnly>
   </div>
 </template>
