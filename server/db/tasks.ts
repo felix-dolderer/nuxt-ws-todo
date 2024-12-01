@@ -7,6 +7,13 @@ export async function dbGetTasks(): Promise<Task[]> {
   return await db.select().from(tasksTable).orderBy(tasksTable.id)
 }
 
+export async function dbGetTask(id: number): Promise<Task> {
+  const taskRes = await db.select().from(tasksTable).where(eq(tasksTable.id, id))
+  if (!taskRes[0]) throw new Error()
+
+  return taskRes[0]
+}
+
 export async function dbAddTask(title: string): Promise<Task | undefined> {
   const inserted = await db.insert(tasksTable).values({ title }).returning()
   return inserted[0]

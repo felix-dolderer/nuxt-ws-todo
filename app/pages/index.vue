@@ -36,11 +36,11 @@ watch(data, () => {
       tasks.value = msg.data
     } else if (msg.topic === TOPICS.TASKS.ADD) {
       tasks.value = [...tasks.value, msg.data]
-    } else if (msg.topic === TOPICS.TASKS.UPDATE) {
+    } else if (msg.topic === TOPICS.TASKS.ID.UPDATE) {
       tasks.value = tasks.value.map((task) =>
         task.id === msg.data.id ? msg.data : task,
       )
-    } else if (msg.topic === TOPICS.TASKS.DELETE) {
+    } else if (msg.topic === TOPICS.TASKS.ID.DELETE) {
       tasks.value = tasks.value.filter((task) => task.id !== msg.data.id)
     }
   }
@@ -64,7 +64,7 @@ function toggleTask(task: Task) {
   send(
     JSON.stringify(
       _buildTasksCommand({
-        command: COMMANDS.TASKS.UPDATE,
+        command: COMMANDS.TASKS.ID.UPDATE,
         data: { ...task, done: !task.done },
       }),
     ),
@@ -74,7 +74,7 @@ function toggleTask(task: Task) {
 function deleteTask({ id }: Task) {
   send(
     JSON.stringify(
-      _buildTasksCommand({ command: COMMANDS.TASKS.DELETE, data: { id } }),
+      _buildTasksCommand({ command: COMMANDS.TASKS.ID.DELETE, data: { id } }),
     ),
   )
 }

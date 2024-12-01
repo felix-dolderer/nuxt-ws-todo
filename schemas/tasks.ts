@@ -1,17 +1,29 @@
 import { z } from "zod"
 
-export const TASKS_TOPICS = Object.freeze({
-  GET: "tasks",
-  ADD: "tasks.add",
+const TASK_ID_TOPICS = Object.freeze({
+  CHANNEL: (taskId: number) => `tasks.${taskId}`,
+  GET: "tasks.getById",
   UPDATE: "tasks.update",
   DELETE: "tasks.delete",
+})
+
+export const TASKS_TOPICS = Object.freeze({
+  CHANNEL: "tasks",
+  GET: "tasks.get",
+  ADD: "tasks.add",
+  ID: TASK_ID_TOPICS,
+})
+
+const TASK_ID_COMMANDS = Object.freeze({
+  GET: "getTask",
+  UPDATE: "updateTask",
+  DELETE: "deleteTask",
 })
 
 export const TASKS_COMMANDS = Object.freeze({
   GET: "getTasks",
   ADD: "addTask",
-  UPDATE: "updateTask",
-  DELETE: "deleteTask",
+  ID: TASK_ID_COMMANDS,
 })
 
 const taskSchema = z.object({
@@ -32,23 +44,28 @@ const commandTasksGetSchema = z.object({
   command: z.literal(TASKS_COMMANDS.GET),
 })
 
+const commandTasksGetIdSchema = z.object({
+  command: z.literal(TASKS_COMMANDS.ID.GET)
+})
+
 const commandTasksAddSchema = z.object({
   command: z.literal(TASKS_COMMANDS.ADD),
   data: taskTitleSchema,
 })
 
 const commandTasksUpdateSchema = z.object({
-  command: z.literal(TASKS_COMMANDS.UPDATE),
+  command: z.literal(TASKS_COMMANDS.ID.UPDATE),
   data: taskSchema,
 })
 
 const commandTasksDeleteSchema = z.object({
-  command: z.literal(TASKS_COMMANDS.DELETE),
+  command: z.literal(TASKS_COMMANDS.ID.DELETE),
   data: taskIdSchema,
 })
 
 export const tasksCommandSchema = z.union([
   commandTasksGetSchema,
+  commandTasksGetIdSchema,
   commandTasksAddSchema,
   commandTasksUpdateSchema,
   commandTasksDeleteSchema,
@@ -59,23 +76,29 @@ const topicTasksGetSchema = z.object({
   data: z.array(taskSchema),
 })
 
+const topicTasksGetIdSchema = z.object({
+  topic: z.literal(TASKS_TOPICS.ID.GET),
+  data: taskSchema,
+})
+
 const topicTasksAddSchema = z.object({
   topic: z.literal(TASKS_TOPICS.ADD),
   data: taskSchema,
 })
 
 const topicTasksUpdateSchema = z.object({
-  topic: z.literal(TASKS_TOPICS.UPDATE),
+  topic: z.literal(TASKS_TOPICS.ID.UPDATE),
   data: taskSchema,
 })
 
 const topicTasksDeleteSchema = z.object({
-  topic: z.literal(TASKS_TOPICS.DELETE),
+  topic: z.literal(TASKS_TOPICS.ID.DELETE),
   data: taskIdSchema,
 })
 
 export const tasksTopicSchema = z.union([
   topicTasksGetSchema,
+  topicTasksGetIdSchema,
   topicTasksAddSchema,
   topicTasksUpdateSchema,
   topicTasksDeleteSchema,
