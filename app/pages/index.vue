@@ -2,10 +2,9 @@
 // #region Imports
 
 import { useWebSocket } from "@vueuse/core"
-import type { z } from "zod"
 import { COMMANDS, TOPICS } from "~~/schemas"
 import type { Task } from "~~/schemas/tasks"
-import { tasksCommandSchema, tasksTopicSchema } from "~~/schemas/tasks"
+import { tasksTopicSchema, taskTitleSchema } from "~~/schemas/tasks"
 
 // #endregion Imports
 
@@ -79,10 +78,6 @@ function deleteTask({ id }: Task) {
   )
 }
 
-function _buildTasksCommand(taskCommand: z.infer<typeof tasksCommandSchema>) {
-  return tasksCommandSchema.parse(taskCommand)
-}
-
 // #endregion Methods
 
 // #region Lifecycle
@@ -95,27 +90,29 @@ onBeforeUnmount(close)
 
 <template>
   <div>
-    <h1 class="text-4xl font-extrabold my-4">Tasks</h1>
-    <form
+    <UForm
+      :schema="taskTitleSchema"
+      :state="newTask"
       @submit.prevent="addTask"
       class="w-full mb-8"
     >
-      <UButtonGroup class="w-full">
-        <UInput
-          v-model="newTask.title"
-          placeholder="New Task"
-          type="text"
-          class="flex-1"
-        />
-        <UButton
-          type="submit"
-          color="neutral"
-          variant="subtle"
-        >
-          Add Task
-        </UButton>
-      </UButtonGroup>
-    </form>
+      <UFormField name="title">
+        <UButtonGroup class="w-full">
+          <UInput
+            v-model="newTask.title"
+            placeholder="New Task"
+            type="text"
+            class="flex-1"
+          />
+          <UButton
+            type="submit"
+            color="neutral"
+            variant="subtle"
+            label="Add Task"
+            />
+        </UButtonGroup>
+      </UFormField>
+    </UForm>
     <TasksTable
       :tasks="tasks"
       @delete-task="deleteTask"

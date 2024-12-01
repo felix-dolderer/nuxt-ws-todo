@@ -37,7 +37,7 @@ export type Task = z.infer<typeof taskSchema>
 const taskIdSchema = taskSchema.pick({ id: true })
 export type TaskId = z.infer<typeof taskIdSchema>
 
-const taskTitleSchema = taskSchema.pick({ title: true })
+export const taskTitleSchema = taskSchema.pick({ title: true })
 export type TaskTitle = z.infer<typeof taskTitleSchema>
 
 const commandTasksGetSchema = z.object({
