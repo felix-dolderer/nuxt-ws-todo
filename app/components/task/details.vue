@@ -7,7 +7,7 @@ const taskTitle = ref({
   title: ""
 })
 
-const props = defineProps<{ task: Task }>()
+const { task } = defineProps<{ task: Task }>()
 const emit = defineEmits<{
   saveTitle: [title: string]
 }>()
@@ -21,13 +21,16 @@ function saveTitle() {
   saving.value = true
 }
 
-watch(props, () => {
-  editing.value = false
-  saving.value = false
-  taskTitle.value.title = props.task.title
-})
+watch(
+  () => task.title,
+  () => {
+    editing.value = false
+    saving.value = false
+    taskTitle.value.title = task.title
+  },
+)
 
-taskTitle.value.title = props.task.title
+taskTitle.value.title = task.title
 </script>
 
 <template>
