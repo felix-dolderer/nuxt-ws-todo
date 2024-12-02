@@ -11,11 +11,10 @@ const TaskCompleteRestoreButton = resolveComponent("TaskCompleteRestoreButton")
 
 // #region Component Composition
 
-type EmitEvents = {
+const emits = defineEmits<{
   updateTask: [task: Task]
   deleteTask: [task: Task]
-}
-const emits = defineEmits<EmitEvents>()
+}>()
 
 const { tasks } = defineProps<{ tasks: Task[] }>()
 
@@ -30,17 +29,13 @@ const statusFilter = ref<typeof statusFilterOptions[number]>("Open")
 
 // #region Functions
 
-function fadeOutRow(elementId: string, task: Task, emitType: keyof EmitEvents) {
+function fadeOutRow(elementId: string): Promise<void> {
   const target = document.getElementById(elementId)?.parentElement?.parentElement
   const motion = useMotion(target, {
     initial: { x: 0, opacity: 1 },
-    leave: { x: 100, opacity: 0, transition: { duration: 200} },
+    leave: { x: 100, opacity: 0, transition: { duration: 200 } },
   })
-  if (emitType === "deleteTask") {
-    motion.leave(() => emits(emitType, task))
-  } else if(emitType === "updateTask") {
-    motion.leave(() => emits(emitType, task))
-  }
+  return new Promise(motion.leave)
 }
 
 // #endregion Function
@@ -104,11 +99,11 @@ const columns: TableColumn<Task>[] = [
         {
           id: elementId,
           task,
-          onUpdateTask: (task: Task) => {
-            if (statusFilter.value === "All") {
-              return emits("updateTask", task)
+          onUpdateTask: async (task: Task) => {
+            if (statusFilter.value !== "All") {
+              await fadeOutRow(elementId)
             }
-            fadeOutRow(elementId, task, "updateTask")
+            emits("updateTask", task)
           },
         },
       )
@@ -128,8 +123,9 @@ const columns: TableColumn<Task>[] = [
           variant: "subtle",
           color: "error",
           icon: "i-lucide-trash",
-          onClick: () => {
-            fadeOutRow(elementId, task, "deleteTask")
+          onClick: async () => {
+            await fadeOutRow(elementId)
+            emits("deleteTask", task)
           },
         },
         () => "Delete",
