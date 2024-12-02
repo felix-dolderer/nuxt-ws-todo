@@ -45,7 +45,7 @@ const commandTasksGetSchema = z.object({
 })
 
 const commandTasksGetIdSchema = z.object({
-  command: z.literal(TASKS_COMMANDS.ID.GET)
+  command: z.literal(TASKS_COMMANDS.ID.GET),
 })
 
 const commandTasksAddSchema = z.object({

@@ -11,7 +11,7 @@ const UButton = resolveComponent("UButton")
 // #region Component Composition
 
 const emits = defineEmits<{
-  toggleTask: [task: Task]
+  updateTask: [task: Task]
   deleteTask: [task: Task]
 }>()
 
@@ -54,15 +54,16 @@ const columns: TableColumn<Task>[] = [
     accessorKey: "title",
     id: "Title",
     header: sortedColumnHeader,
-    cell: ({ row }) => h(
-      UButton,
-      { 
-        variant: 'ghost',
-        color: 'neutral',
-        to: { name: 'tasks-taskId', params: { taskId: row.original.id } }
-      },
-      () => row.original.title
-    ),
+    cell: ({ row }) =>
+      h(
+        UButton,
+        {
+          variant: "ghost",
+          color: "neutral",
+          to: { name: "tasks-taskId", params: { taskId: row.original.id } },
+        },
+        () => row.original.title,
+      ),
   },
   {
     accessorKey: "done",
@@ -93,7 +94,7 @@ const columns: TableColumn<Task>[] = [
           variant: "subtle",
           color,
           icon,
-          onClick: () => emits("toggleTask", task),
+          onClick: () => emits("updateTask", { ...task, done: !done }),
         },
         () => text,
       )

@@ -59,13 +59,10 @@ function addTask() {
   newTask.value.title = ""
 }
 
-function toggleTask(task: Task) {
+function updateTask(task: Task) {
   send(
     JSON.stringify(
-      _buildTasksCommand({
-        command: COMMANDS.TASKS.ID.UPDATE,
-        data: { ...task, done: !task.done },
-      }),
+      _buildTasksCommand({ command: COMMANDS.TASKS.ID.UPDATE, data: task }),
     ),
   )
 }
@@ -109,14 +106,14 @@ onBeforeUnmount(close)
             color="neutral"
             variant="subtle"
             label="Add Task"
-            />
+          />
         </UButtonGroup>
       </UFormField>
     </UForm>
     <TasksTable
       :tasks="tasks"
       @delete-task="deleteTask"
-      @toggle-task="toggleTask"
+      @update-task="updateTask"
     />
   </div>
 </template>

@@ -1,23 +1,31 @@
 <script setup lang="ts">
-import { useWebSocket } from '@vueuse/core';
-import { useRouteParams } from '@vueuse/router';
-import { COMMANDS, TOPICS } from '~~/schemas';
-import { type Task } from '~~/schemas/tasks';
-import { tasksTopicSchema } from '~~/schemas/tasks';
+// #region Imports
+
+import { useWebSocket } from "@vueuse/core"
+import { useRouteParams } from "@vueuse/router"
+import { COMMANDS, TOPICS } from "~~/schemas"
+import { tasksTopicSchema, type Task } from "~~/schemas/tasks"
+
+// #endregion Imports
 
 definePageMeta({
   validate: async (route) => {
-    return typeof route.params.taskId === "string" && /^\d+$/.test(route.params.taskId)
-  }
+    return (
+      typeof route.params.taskId === "string" &&
+      /^\d+$/.test(route.params.taskId)
+    )
+  },
 })
 
-const taskId = useRouteParams('taskId', '', { transform: Number })
+const taskId = useRouteParams("taskId", "", { transform: Number })
 const task = ref<Task>()
 
 // #region WebSockets
 
 const { host } = useRequestURL()
-const { data, send, close } = useWebSocket(`ws://${host}/api/ws/tasks/${taskId.value}`)
+const { data, send, close } = useWebSocket(
+  `ws://${host}/api/ws/tasks/${taskId.value}`,
+)
 
 watch(data, () => {
   if (!(data.value instanceof Blob)) return
@@ -43,11 +51,10 @@ watch(data, () => {
 
 // #endregion WebSockets
 
-
 // #region Methods
 
 function saveTitle(title: string) {
-  if (!task.value) return;
+  if (!task.value) return
 
   send(
     JSON.stringify(
@@ -72,7 +79,10 @@ onBeforeUnmount(close)
 <template>
   <div>
     <ClientOnly v-if="task!!">
-      <TaskDetails :task="task" @save-title="saveTitle" />
+      <TaskDetails
+        :task="task"
+        @save-title="saveTitle"
+      />
     </ClientOnly>
   </div>
 </template>

@@ -53,7 +53,7 @@ function publishTaskMessage(
   message: z.infer<typeof tasksTopicSchema>,
   peer: Peer,
 ) {
-  if (message.topic === TOPICS.TASKS.GET) return;
+  if (message.topic === TOPICS.TASKS.GET) return
 
   peer.send(message)
   peer.publish(TOPICS.TASKS.CHANNEL, message)
