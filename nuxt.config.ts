@@ -8,7 +8,7 @@ export default defineNuxtConfig({
     experimental: { websocket: true },
     esbuild: { options: { target: "ESNext" } },
   },
-  modules: ["@nuxt/ui"],
+  modules: ["@nuxt/ui", "@vueuse/motion/nuxt"],
   css: ["~/assets/css/main.css"],
   vite: { build: { target: "ESNext" } },
   future: { compatibilityVersion: 4 },

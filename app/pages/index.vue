@@ -9,10 +9,19 @@ import { tasksTopicSchema, taskTitleSchema } from "~~/schemas/tasks"
 
 // #endregion Imports
 
+// #region Shortcuts
+
+defineShortcuts({
+  "+": focusAddTaskInput,
+})
+
+// #endregion Shortcuts
+
 // #region State
 
 const tasks = ref<Task[]>([])
 const newTask = ref<TaskTitle>({ title: "" })
+const addTaskInput = useTemplateRef('addTaskInput')
 
 // #endregion State
 
@@ -59,6 +68,7 @@ function addTask() {
   if (!command.success) return
   send(JSON.stringify(command.data))
   newTask.value.title = ""
+  setTimeout(focusAddTaskInput)
 }
 
 function updateTask(task: Task) {
@@ -77,6 +87,10 @@ function deleteTask({ id }: Task) {
   })
   if (!command.success) return
   send(JSON.stringify(command.data))
+}
+
+function focusAddTaskInput() {
+  addTaskInput.value?.inputRef?.focus()
 }
 
 // #endregion Methods
@@ -100,11 +114,16 @@ onBeforeUnmount(close)
       <UFormField name="title">
         <UButtonGroup class="w-full">
           <UInput
+            ref="addTaskInput"
             v-model="newTask.title"
             placeholder="New Task"
             type="text"
             class="flex-1"
-          />
+          >
+            <template #trailing>
+              <UKbd value="+" />
+            </template>
+          </UInput>
           <UButton
             type="submit"
             color="neutral"

@@ -11,10 +11,11 @@ const TaskCompleteRestoreButton = resolveComponent("TaskCompleteRestoreButton")
 
 // #region Component Composition
 
-const emits = defineEmits<{
+type EmitEvents = {
   updateTask: [task: Task]
   deleteTask: [task: Task]
-}>()
+}
+const emits = defineEmits<EmitEvents>()
 
 const { tasks } = defineProps<{ tasks: Task[] }>()
 
@@ -22,10 +23,27 @@ const { tasks } = defineProps<{ tasks: Task[] }>()
 
 // #region State
 
-const statusFilterOptions = ["Open", "Done", "All"]
-const statusFilter = ref("Open")
+const statusFilterOptions = ["Open", "Done", "All"] as const
+const statusFilter = ref<typeof statusFilterOptions[number]>("Open")
 
 // #endregion State
+
+// #region Functions
+
+function fadeOutRow(elementId: string, task: Task, emitType: keyof EmitEvents) {
+  const target = document.getElementById(elementId)?.parentElement?.parentElement
+  const motion = useMotion(target, {
+    initial: { x: 0, opacity: 1 },
+    leave: { x: 100, opacity: 0, transition: { duration: 200} },
+  })
+  if (emitType === "deleteTask") {
+    motion.leave(() => emits(emitType, task))
+  } else if(emitType === "updateTask") {
+    motion.leave(() => emits(emitType, task))
+  }
+}
+
+// #endregion Function
 
 // #region Table
 
@@ -80,11 +98,18 @@ const columns: TableColumn<Task>[] = [
       }
     },
     cell: ({ row: { original: task } }) => {
+      const elementId = `tasksTableTask-${task.id}`
       return h(
         TaskCompleteRestoreButton,
         {
+          id: elementId,
           task,
-          onUpdateTask: (task: Task) => emits('updateTask', task)
+          onUpdateTask: (task: Task) => {
+            if (statusFilter.value === "All") {
+              return emits("updateTask", task)
+            }
+            fadeOutRow(elementId, task, "updateTask")
+          },
         },
       )
     },
@@ -94,14 +119,18 @@ const columns: TableColumn<Task>[] = [
     header: "",
     cell: ({ row }) => {
       const task = row.original
+      const elementId = `tasksTableTask-${task.id}`
 
       return h(
         UButton,
         {
+          id: elementId,
           variant: "subtle",
           color: "error",
           icon: "i-lucide-trash",
-          onClick: () => emits("deleteTask", task),
+          onClick: () => {
+            fadeOutRow(elementId, task, "deleteTask")
+          },
         },
         () => "Delete",
       )
@@ -124,13 +153,13 @@ const columnFilters = computed(() => [
       <USelect
         v-model="statusFilter"
         icon="i-lucide-filter"
-        :items="statusFilterOptions"
+        :items="[...statusFilterOptions]"
         class="w-48 float-right block clear-both"
       />
     </div>
     <ClientOnly>
       <UTable
-        ref="tasksUTable"
+        id="tasksTable"
         :data="tasks"
         :columns="columns"
         v-model:sorting="sorting"
