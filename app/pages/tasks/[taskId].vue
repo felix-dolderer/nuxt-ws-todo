@@ -53,17 +53,13 @@ watch(data, () => {
 
 // #region Methods
 
-function saveTitle(title: string) {
-  if (!task.value) return
-
-  send(
-    JSON.stringify(
-      _buildTasksCommand({
-        command: COMMANDS.TASKS.ID.UPDATE,
-        data: { ...task.value, title },
-      }),
-    ),
-  )
+function updateTask(task: Task) {
+  const command = _buildTasksCommand({
+    command: COMMANDS.TASKS.ID.UPDATE,
+    data: task,
+  })
+  if (!command.success) return
+  send(JSON.stringify(command.data))
 }
 
 // #endregion Methods
@@ -81,7 +77,7 @@ onBeforeUnmount(close)
     <ClientOnly v-if="task!!">
       <TaskDetails
         :task="task"
-        @save-title="saveTitle"
+        @update-task="updateTask"
       />
     </ClientOnly>
   </div>

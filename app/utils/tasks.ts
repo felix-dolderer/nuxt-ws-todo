@@ -4,5 +4,5 @@ import { tasksCommandSchema } from "~~/schemas/tasks"
 export function _buildTasksCommand(
   taskCommand: z.infer<typeof tasksCommandSchema>,
 ) {
-  return tasksCommandSchema.parse(taskCommand)
+  return tasksCommandSchema.safeParse(taskCommand)
 }

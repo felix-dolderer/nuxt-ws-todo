@@ -26,7 +26,7 @@ export const TASKS_COMMANDS = Object.freeze({
   ID: TASK_ID_COMMANDS,
 })
 
-const taskSchema = z.object({
+export const taskSchema = z.object({
   id: z.number(),
   title: z.string().min(2).max(255),
   done: z.boolean(),
@@ -34,7 +34,7 @@ const taskSchema = z.object({
 })
 export type Task = z.infer<typeof taskSchema>
 
-const taskIdSchema = taskSchema.pick({ id: true })
+export const taskIdSchema = taskSchema.pick({ id: true })
 export type TaskId = z.infer<typeof taskIdSchema>
 
 export const taskTitleSchema = taskSchema.pick({ title: true })

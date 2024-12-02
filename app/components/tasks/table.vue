@@ -5,6 +5,7 @@ import type { TableColumn } from "@nuxt/ui"
 import type { Task } from "~~/schemas/tasks"
 
 const UButton = resolveComponent("UButton")
+const TaskCompleteRestoreButton = resolveComponent("TaskCompleteRestoreButton")
 
 // #endregion Imports
 
@@ -78,25 +79,13 @@ const columns: TableColumn<Task>[] = [
         return true
       }
     },
-    cell: ({ row }) => {
-      const task = row.original
-      const { done } = task
-
-      const color = done ? "warning" : "success"
-      const icon = done
-        ? "i-lucide-archive-restore"
-        : "i-lucide-circle-check-big"
-      const text = done ? "Restore" : "Complete"
-
+    cell: ({ row: { original: task } }) => {
       return h(
-        UButton,
+        TaskCompleteRestoreButton,
         {
-          variant: "subtle",
-          color,
-          icon,
-          onClick: () => emits("updateTask", { ...task, done: !done }),
+          task,
+          onUpdateTask: (task: Task) => emits('updateTask', task)
         },
-        () => text,
       )
     },
   },

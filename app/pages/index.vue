@@ -2,8 +2,9 @@
 // #region Imports
 
 import { useWebSocket } from "@vueuse/core"
+import { z } from "zod";
 import { COMMANDS, TOPICS } from "~~/schemas"
-import type { Task } from "~~/schemas/tasks"
+import type { Task, TaskTitle } from "~~/schemas/tasks"
 import { tasksTopicSchema, taskTitleSchema } from "~~/schemas/tasks"
 
 // #endregion Imports
@@ -11,7 +12,7 @@ import { tasksTopicSchema, taskTitleSchema } from "~~/schemas/tasks"
 // #region State
 
 const tasks = ref<Task[]>([])
-const newTask = ref<Task>({ id: 0, title: "", done: false, parentTaskId: null })
+const newTask = ref<TaskTitle>({ title: "" })
 
 // #endregion State
 
@@ -51,28 +52,31 @@ watch(data, () => {
 // #region Methods
 
 function addTask() {
-  send(
-    JSON.stringify(
-      _buildTasksCommand({ command: COMMANDS.TASKS.ADD, data: newTask.value }),
-    ),
-  )
+  const command = _buildTasksCommand({
+    command: COMMANDS.TASKS.ADD,
+    data: newTask.value,
+  })
+  if (!command.success) return
+  send(JSON.stringify(command.data))
   newTask.value.title = ""
 }
 
 function updateTask(task: Task) {
-  send(
-    JSON.stringify(
-      _buildTasksCommand({ command: COMMANDS.TASKS.ID.UPDATE, data: task }),
-    ),
-  )
+  const command = _buildTasksCommand({
+    command: COMMANDS.TASKS.ID.UPDATE,
+    data: task,
+  })
+  if (!command.success) return
+  send(JSON.stringify(command.data))
 }
 
 function deleteTask({ id }: Task) {
-  send(
-    JSON.stringify(
-      _buildTasksCommand({ command: COMMANDS.TASKS.ID.DELETE, data: { id } }),
-    ),
-  )
+  const command = _buildTasksCommand({
+    command: COMMANDS.TASKS.ID.DELETE,
+    data: { id },
+  })
+  if (!command.success) return
+  send(JSON.stringify(command.data))
 }
 
 // #endregion Methods
@@ -88,7 +92,7 @@ onBeforeUnmount(close)
 <template>
   <div>
     <UForm
-      :schema="taskTitleSchema"
+      :schema="taskTitleSchema.or(z.object({ title: z.literal('') }))"
       :state="newTask"
       @submit.prevent="addTask"
       class="w-full mb-8"
