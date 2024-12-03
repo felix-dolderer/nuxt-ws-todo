@@ -1,10 +1,16 @@
-import { eq } from "drizzle-orm"
+import { eq, ilike } from "drizzle-orm"
 import type { Task } from "~~/schemas/tasks"
 import { db } from "./connection"
 import { tasksTable } from "./schema"
 
-export async function dbGetTasks(): Promise<Task[]> {
-  return await db.select().from(tasksTable).orderBy(tasksTable.id)
+type GetTasksOptions = { query?: string }
+export async function dbGetTasks(options?: GetTasksOptions): Promise<Task[]> {
+  const tasks = await db
+    .select()
+    .from(tasksTable)
+    .where(ilike(tasksTable.title, `%${options?.query || ""}%`))
+    .orderBy(tasksTable.id)
+  return tasks
 }
 
 export async function dbGetTask(id: number): Promise<Task> {
@@ -26,10 +32,11 @@ export async function dbUpdateTask({
   id,
   title,
   done,
+  parentTaskId,
 }: Task): Promise<Task | undefined> {
   const updated = await db
     .update(tasksTable)
-    .set({ title, done })
+    .set({ title, done, parentTaskId })
     .where(eq(tasksTable.id, id))
     .returning()
   return updated[0]

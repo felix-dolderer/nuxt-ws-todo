@@ -27,25 +27,19 @@ export async function getTask(peer: Peer, { id }: TaskId) {
 
 export async function addTask(peer: Peer, { title }: TaskTitle) {
   const addedTask = await dbAddTask(title)
-  if (!addedTask) {
-    return
-  }
+  if (!addedTask) return
   publishTaskMessage({ topic: TOPICS.TASKS.ADD, data: addedTask }, peer)
 }
 
 export async function updateTask(peer: Peer, task: Task) {
   const updatedTask = await dbUpdateTask(task)
-  if (!updatedTask) {
-    return
-  }
+  if (!updatedTask) return
   publishTaskMessage({ topic: TOPICS.TASKS.ID.UPDATE, data: updatedTask }, peer)
 }
 
 export async function deleteTask(peer: Peer, { id }: TaskId) {
   const deletedTask = await dbDeleteTask(id)
-  if (!deletedTask) {
-    return
-  }
+  if (!deletedTask) return
   publishTaskMessage({ topic: TOPICS.TASKS.ID.DELETE, data: deletedTask }, peer)
 }
 
