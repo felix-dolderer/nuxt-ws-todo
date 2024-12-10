@@ -33,6 +33,10 @@ export const taskSchema = z.object({
   parentTaskId: z.number().nullable(),
 })
 export type Task = z.infer<typeof taskSchema>
+export const taskWithSubtasksSchema = taskSchema.extend({
+  subtasks: z.array(taskSchema),
+})
+export type TaskWithSubtasks = z.infer<typeof taskWithSubtasksSchema>
 
 export const taskIdSchema = taskSchema.pick({ id: true })
 export type TaskId = z.infer<typeof taskIdSchema>
@@ -78,7 +82,7 @@ const topicTasksGetSchema = z.object({
 
 const topicTasksGetIdSchema = z.object({
   topic: z.literal(TASKS_TOPICS.ID.GET),
-  data: taskSchema,
+  data: taskWithSubtasksSchema,
 })
 
 const topicTasksAddSchema = z.object({

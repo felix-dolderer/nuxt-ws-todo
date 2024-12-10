@@ -4,7 +4,8 @@
 import { useWebSocket } from "@vueuse/core"
 import { useRouteParams } from "@vueuse/router"
 import { COMMANDS, TOPICS } from "~~/schemas"
-import { tasksTopicSchema, type Task } from "~~/schemas/tasks"
+import { tasksTopicSchema } from "~~/schemas/tasks"
+import type { Task, TaskId, TaskWithSubtasks } from "~~/schemas/tasks"
 
 // #endregion Imports
 
@@ -18,7 +19,7 @@ definePageMeta({
 })
 
 const taskId = useRouteParams("taskId", "", { transform: Number })
-const task = ref<Task>()
+const task = ref<TaskWithSubtasks>()
 
 // #region WebSockets
 
@@ -41,9 +42,47 @@ watch(data, () => {
     if (msg.topic === TOPICS.TASKS.ID.GET) {
       task.value = msg.data
     } else if (msg.topic === TOPICS.TASKS.ID.UPDATE) {
-      task.value = msg.data
+      // There should be no updates before the task is set
+      if (!task.value) return
+
+      // If the update is for the task itself
+      if (task.value.id === msg.data.id) {
+        // Update the task.
+        task.value = {
+          ...task.value,
+          ...msg.data,
+        }
+      }
+
+      // The update is for a subtask.
+      else {
+        // Remove a subtask.
+        if (msg.data.parentTaskId !== task.value.id) {
+          removeSubtask(msg.data)
+        }
+        // Update a subtask.
+        else if (task.value.subtasks.some(({ id }) => id === msg.data.id)) {
+          task.value.subtasks = task.value.subtasks.map((subtask) =>
+            subtask.id === msg.data.id ? msg.data : subtask,
+          )
+        }
+        // Add a subtask.
+        else {
+          task.value.subtasks.push(msg.data)
+        }
+      }
     } else if (msg.topic === TOPICS.TASKS.ID.DELETE) {
-      // TODO: Do something useful.
+      // There should be no updates before the task is set
+      if (!task.value) return
+
+      // If the task is deleted
+      if (task.value.id === msg.data.id) {
+        // TODO: Do something useful.
+      }
+      // If a subtask is deleted
+      else {
+        removeSubtask(msg.data)
+      }
     }
   }
   reader.readAsText(data.value)
@@ -60,6 +99,13 @@ function updateTask(task: Task) {
   })
   if (!command.success) return
   send(JSON.stringify(command.data))
+}
+
+function removeSubtask(subtask: TaskId) {
+  if (!task.value) return
+  task.value.subtasks = task.value?.subtasks.filter(
+    ({ id }) => id !== subtask.id,
+  )
 }
 
 // #endregion Methods
@@ -79,6 +125,23 @@ onBeforeUnmount(close)
         :task="task"
         @update-task="updateTask"
       />
+      <h2
+        v-if="task.subtasks.length > 0"
+        class="font-semibold text-xl mt-8"
+      >
+        Subtasks
+      </h2>
+      <div class="flex flex-wrap">
+        <UCard
+          v-for="subtask in task.subtasks"
+          class="m-4 flex-auto"
+        >
+          <TaskDetails
+            :task="subtask"
+            @update-task="updateTask"
+          />
+        </UCard>
+      </div>
     </ClientOnly>
   </div>
 </template>

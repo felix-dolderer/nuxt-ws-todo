@@ -1,7 +1,7 @@
 import { z } from "zod"
 import { COMMANDS, TOPICS } from "~~/schemas"
 import { tasksCommandSchema } from "~~/schemas/tasks"
-import { deleteTask, getTask, updateTask } from "~~/server/ws/tasks"
+import { deleteTask, getTaskWithSubtasks, updateTask } from "~~/server/ws/tasks"
 
 const API_WS_TASKS_ID_URL = "/api/ws/tasks/"
 
@@ -10,7 +10,7 @@ export default defineWebSocketHandler({
     const unparsedTaskId = peer.websocket.url?.split(API_WS_TASKS_ID_URL)[1]
     const taskId = z.coerce.number().parse(unparsedTaskId)
     peer.subscribe(TOPICS.TASKS.ID.CHANNEL(taskId))
-    getTask(peer, { id: taskId })
+    getTaskWithSubtasks(peer, { id: taskId })
   },
   message(peer, rawMessage) {
     const message = tasksCommandSchema.parse(rawMessage.json())

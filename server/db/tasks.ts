@@ -1,5 +1,5 @@
 import { eq, ilike } from "drizzle-orm"
-import type { Task } from "~~/schemas/tasks"
+import type { Task, TaskWithSubtasks } from "~~/schemas/tasks"
 import { db } from "./connection"
 import { tasksTable } from "./schema"
 
@@ -21,6 +21,26 @@ export async function dbGetTask(id: number): Promise<Task> {
   if (!taskRes[0]) throw new Error()
 
   return taskRes[0]
+}
+
+export async function dbGetTaskWithSubtasks(
+  id: number,
+): Promise<TaskWithSubtasks> {
+  const taskRes = await db
+    .select()
+    .from(tasksTable)
+    .where(eq(tasksTable.id, id))
+  if (!taskRes[0]) throw new Error()
+  const task = taskRes[0]
+  const subtasks = await db
+    .select()
+    .from(tasksTable)
+    .where(eq(tasksTable.parentTaskId, id))
+
+  return {
+    ...task,
+    subtasks,
+  }
 }
 
 export async function dbAddTask(title: string): Promise<Task | undefined> {
