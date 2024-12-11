@@ -3,7 +3,12 @@
 import { useWebSocket } from "@vueuse/core"
 import { useRouteParams } from "@vueuse/router"
 import { COMMANDS, TOPICS } from "~~/schemas"
-import type { AddTaskData, Task, TaskId, TaskWithSubtasks } from "~~/schemas/tasks"
+import type {
+  AddTaskData,
+  Task,
+  TaskId,
+  TaskWithSubtasks,
+} from "~~/schemas/tasks"
 import { tasksTopicSchema } from "~~/schemas/tasks"
 // #endregion Imports
 

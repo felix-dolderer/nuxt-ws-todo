@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Task } from '~~/schemas/tasks'
+import type { Task } from "~~/schemas/tasks"
 
 const { task } = defineProps<{ task: Task }>()
 const emits = defineEmits<{ updateTask: [task: Task] }>()
@@ -13,7 +13,7 @@ function updateTask() {
 
 watch(
   () => task.done,
-  () => saving.value = false,
+  () => (saving.value = false),
 )
 </script>
 
@@ -21,9 +21,7 @@ watch(
   <UButton
     :label="task.done ? 'Restore' : 'Complete'"
     :color="task.done ? 'neutral' : 'success'"
-    :icon="task.done
-      ? 'i-lucide-archive-restore'
-      : 'i-lucide-circle-check-big'"
+    :icon="task.done ? 'i-lucide-archive-restore' : 'i-lucide-circle-check-big'"
     :loading="saving"
     variant="subtle"
     @click="updateTask"
