@@ -1,12 +1,10 @@
 <script setup lang="ts">
 // #region Imports
-
 import { useWebSocket } from "@vueuse/core"
 import { useRouteParams } from "@vueuse/router"
 import { COMMANDS, TOPICS } from "~~/schemas"
-import type { Task, TaskId, TaskWithSubtasks } from "~~/schemas/tasks"
+import type { AddTaskData, Task, TaskId, TaskWithSubtasks } from "~~/schemas/tasks"
 import { tasksTopicSchema } from "~~/schemas/tasks"
-
 // #endregion Imports
 
 definePageMeta({
@@ -23,7 +21,6 @@ const fetchedTask = await $fetch(`/api/rest/tasks/${taskId.value}`)
 const task = ref<TaskWithSubtasks>(fetchedTask)
 
 // #region WebSockets
-
 const { host } = useRequestURL()
 const { data, send, close } = useWebSocket(
   `ws://${host}/api/ws/tasks/${taskId.value}`,
@@ -42,6 +39,8 @@ watch(data, () => {
 
     if (msg.topic === TOPICS.TASKS.ID.GET) {
       task.value = msg.data
+    } else if (msg.topic === TOPICS.TASKS.ADD) {
+      task.value.subtasks.push(msg.data)
     } else if (msg.topic === TOPICS.TASKS.ID.UPDATE) {
       // If the update is for the task itself
       if (task.value.id === msg.data.id) {
@@ -82,10 +81,18 @@ watch(data, () => {
   }
   reader.readAsText(data.value)
 })
-
 // #endregion WebSockets
 
 // #region Methods
+function addTask(addTaskData: AddTaskData) {
+  const command = _buildTasksCommand({
+    command: COMMANDS.TASKS.ADD,
+    data: addTaskData,
+  })
+  console.log(command)
+  if (!command.success) return
+  send(JSON.stringify(command.data))
+}
 
 function updateTask(task: Task) {
   const command = _buildTasksCommand({
@@ -102,14 +109,11 @@ function removeSubtask(subtask: TaskId) {
     ({ id }) => id !== subtask.id,
   )
 }
-
 // #endregion Methods
 
 // #region Lifecycle
-
 onBeforeRouteLeave(() => close())
 onBeforeUnmount(close)
-
 // #endregion Lifecycle
 </script>
 
@@ -126,6 +130,12 @@ onBeforeUnmount(close)
       Subtasks
     </h2>
     <div class="flex flex-wrap">
+      <UCard class="m-4 flex-auto">
+        <TasksAdd
+          :parent-task-id="taskId"
+          @add-task="addTask"
+        />
+      </UCard>
       <UCard
         v-for="subtask in task.subtasks"
         class="m-4 flex-auto"
