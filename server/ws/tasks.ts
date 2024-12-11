@@ -1,8 +1,8 @@
-import type { Peer } from "crossws"
+import type { Message, Peer } from "crossws"
 import { z } from "zod"
-import { TOPICS } from "~~/schemas"
+import { COMMANDS, TOPICS } from "~~/schemas"
 import type { AddTaskData, Task, TaskId } from "~~/schemas/tasks"
-import { tasksTopicSchema } from "~~/schemas/tasks"
+import { tasksCommandSchema, tasksTopicSchema } from "~~/schemas/tasks"
 import {
   dbAddTask,
   dbDeleteTask,
@@ -12,17 +12,22 @@ import {
   dbUpdateTask,
 } from "~~/server/db/tasks"
 
+export const tasksWsMessageHandler = (peer: Peer, rawMessage: Message) => {
+  const message = tasksCommandSchema.parse(rawMessage.json())
+  const { command } = message
+  if (command === COMMANDS.TASKS.ADD) {
+    addTask(peer, message.data)
+  } else if (command === COMMANDS.TASKS.ID.UPDATE) {
+    updateTask(peer, message.data)
+  } else if (command === COMMANDS.TASKS.ID.DELETE) {
+    deleteTask(peer, message.data)
+  }
+}
+
 export async function getTasks(peer: Peer) {
   peer.send({
     topic: TOPICS.TASKS.GET,
     data: await dbGetTasks(),
-  })
-}
-
-export async function getTask(peer: Peer, { id }: TaskId) {
-  peer.send({
-    topic: TOPICS.TASKS.ID.GET,
-    data: await dbGetTask(id),
   })
 }
 
@@ -33,13 +38,13 @@ export async function getTaskWithSubtasks(peer: Peer, { id }: TaskId) {
   })
 }
 
-export async function addTask(peer: Peer, addTaskData: AddTaskData) {
+async function addTask(peer: Peer, addTaskData: AddTaskData) {
   const addedTask = await dbAddTask(addTaskData)
   if (!addedTask) return
   publishTaskMessage({ topic: TOPICS.TASKS.ADD, data: addedTask }, peer)
 }
 
-export async function updateTask(peer: Peer, task: Task) {
+async function updateTask(peer: Peer, task: Task) {
   const existingTask = await dbGetTask(task.id)
   const updatedTask = await dbUpdateTask(task)
   if (!updatedTask) return
@@ -52,6 +57,7 @@ export async function updateTask(peer: Peer, task: Task) {
       existingTask.parentTaskId,
     )
   }
+
   if (updatedTask.parentTaskId) {
     publishTaskMessage(
       { topic: TOPICS.TASKS.ID.UPDATE, data: updatedTask },
@@ -61,7 +67,7 @@ export async function updateTask(peer: Peer, task: Task) {
   }
 }
 
-export async function deleteTask(peer: Peer, { id }: TaskId) {
+async function deleteTask(peer: Peer, { id }: TaskId) {
   const deletedTask = await dbDeleteTask(id)
   if (!deletedTask) return
   publishTaskMessage({ topic: TOPICS.TASKS.ID.DELETE, data: deletedTask }, peer)

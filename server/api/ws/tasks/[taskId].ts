@@ -1,31 +1,24 @@
+import type { Peer } from "crossws"
 import { z } from "zod"
-import { COMMANDS, TOPICS } from "~~/schemas"
-import { tasksCommandSchema } from "~~/schemas/tasks"
-import { addTask, deleteTask, getTaskWithSubtasks, updateTask } from "~~/server/ws/tasks"
+import { TOPICS } from "~~/schemas"
+import { getTaskWithSubtasks, tasksWsMessageHandler } from "~~/server/ws/tasks"
 
 const API_WS_TASKS_ID_URL = "/api/ws/tasks/"
 
 export default defineWebSocketHandler({
   open(peer) {
-    const unparsedTaskId = peer.websocket.url?.split(API_WS_TASKS_ID_URL)[1]
-    const taskId = z.coerce.number().parse(unparsedTaskId)
+    const taskId = getTaskIdFromPeer(peer)
     peer.subscribe(TOPICS.TASKS.ID.CHANNEL(taskId))
     getTaskWithSubtasks(peer, { id: taskId })
   },
-  message(peer, rawMessage) {
-    const message = tasksCommandSchema.parse(rawMessage.json())
-    const { command } = message
-    if (command === COMMANDS.TASKS.ADD) {
-      addTask(peer, message.data)
-    } if (command === COMMANDS.TASKS.ID.UPDATE) {
-      updateTask(peer, message.data)
-    } else if (command === COMMANDS.TASKS.ID.DELETE) {
-      deleteTask(peer, message.data)
-    }
-  },
+  message: tasksWsMessageHandler,
   close(peer) {
-    const unparsedTaskId = peer.websocket.url?.split(API_WS_TASKS_ID_URL)[1]
-    const taskId = z.coerce.number().parse(unparsedTaskId)
+    const taskId = getTaskIdFromPeer(peer)
     peer.unsubscribe(TOPICS.TASKS.ID.CHANNEL(taskId))
   },
 })
+
+function getTaskIdFromPeer(peer: Peer) {
+  const unparsedTaskId = peer.websocket.url?.split(API_WS_TASKS_ID_URL)[1]
+  return z.coerce.number().parse(unparsedTaskId)
+}
