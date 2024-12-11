@@ -1,7 +1,7 @@
 import type { Peer } from "crossws"
 import { z } from "zod"
 import { TOPICS } from "~~/schemas"
-import type { Task, TaskId, TaskTitle } from "~~/schemas/tasks"
+import type { AddTaskData, Task, TaskId } from "~~/schemas/tasks"
 import { tasksTopicSchema } from "~~/schemas/tasks"
 import {
   dbAddTask,
@@ -33,8 +33,8 @@ export async function getTaskWithSubtasks(peer: Peer, { id }: TaskId) {
   })
 }
 
-export async function addTask(peer: Peer, { title }: TaskTitle) {
-  const addedTask = await dbAddTask(title)
+export async function addTask(peer: Peer, addTaskData: AddTaskData) {
+  const addedTask = await dbAddTask(addTaskData)
   if (!addedTask) return
   publishTaskMessage({ topic: TOPICS.TASKS.ADD, data: addedTask }, peer)
 }

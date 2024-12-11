@@ -29,8 +29,8 @@ export const TASKS_COMMANDS = Object.freeze({
 export const taskSchema = z.object({
   id: z.number(),
   title: z.string().min(2).max(255),
-  done: z.boolean(),
-  parentTaskId: z.number().nullable(),
+  done: z.boolean().default(false),
+  parentTaskId: z.number().nullable().default(null),
 })
 export type Task = z.infer<typeof taskSchema>
 export const taskWithSubtasksSchema = taskSchema.extend({
@@ -44,6 +44,11 @@ export type TaskId = z.infer<typeof taskIdSchema>
 export const taskTitleSchema = taskSchema.pick({ title: true })
 export type TaskTitle = z.infer<typeof taskTitleSchema>
 
+export const addTaskDataSchema = taskSchema
+  .omit({ id: true })
+  .partial({ done: true, parentTaskId: true })
+export type AddTaskData = z.infer<typeof addTaskDataSchema>
+
 const commandTasksGetSchema = z.object({
   command: z.literal(TASKS_COMMANDS.GET),
 })
@@ -54,7 +59,7 @@ const commandTasksGetIdSchema = z.object({
 
 const commandTasksAddSchema = z.object({
   command: z.literal(TASKS_COMMANDS.ADD),
-  data: taskTitleSchema,
+  data: addTaskDataSchema,
 })
 
 const commandTasksUpdateSchema = z.object({
