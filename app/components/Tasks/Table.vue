@@ -20,13 +20,6 @@ const { tasks } = defineProps<{ tasks: Task[] }>()
 
 // #endregion Component Composition
 
-// #region State
-
-const statusFilterOptions = ["Open", "Done", "All"] as const
-const statusFilter = ref<(typeof statusFilterOptions)[number]>("Open")
-
-// #endregion State
-
 // #region Functions
 
 function fadeOutRow(elementId: string): Promise<void> {
@@ -130,6 +123,7 @@ const columns: TableColumn<Task>[] = [
 
 const sorting = ref([{ id: "id", desc: false }])
 
+const statusFilter = ref<StatusFilter>("Open")
 const columnFilters = computed(() => [
   { id: "done", value: statusFilter.value },
 ])
@@ -139,14 +133,7 @@ const columnFilters = computed(() => [
 
 <template>
   <div>
-    <div class="block h-8">
-      <USelect
-        v-model="statusFilter"
-        icon="i-lucide-filter"
-        :items="[...statusFilterOptions]"
-        class="w-48 float-right block clear-both"
-      />
-    </div>
+    <TasksStatusFilter v-model="statusFilter" />
     <ClientOnly>
       <UTable
         id="tasksTable"
