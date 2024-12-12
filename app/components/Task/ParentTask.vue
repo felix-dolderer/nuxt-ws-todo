@@ -62,7 +62,7 @@ watch(() => task.parentTaskId, reset)
       class="flex"
     >
       <div v-if="task.parentTaskId">
-        <TaskDetailsTaskIdAndTitle
+        <TaskTitleLink
           v-if="parentTask"
           :task="parentTask"
         />
@@ -92,14 +92,14 @@ watch(() => task.parentTaskId, reset)
         :filter="false"
         class="flex-1"
       >
-        <TaskDetailsTaskIdAndTitle
+        <TaskTitleLink
           v-if="selectedParentTask"
           :task="selectedParentTask"
           class="truncate"
         />
         <p v-else>Select</p>
         <template #item-label="{ item }">
-          <TaskDetailsTaskIdAndTitle
+          <TaskTitleLink
             :task="item"
             class="truncate"
           />

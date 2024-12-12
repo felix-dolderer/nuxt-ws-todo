@@ -15,11 +15,11 @@ function updateTask(task: Task) {
 
 <template>
   <div>
-    <TaskDetailsTitle
+    <TaskTitle
       :task="task"
       @update-task="updateTask"
     />
-    <TaskDetailsParentTask
+    <TaskParentTask
       :task="task"
       @update-task="updateTask"
     />

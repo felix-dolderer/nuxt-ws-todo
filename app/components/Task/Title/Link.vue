@@ -5,8 +5,7 @@ defineProps<{ task: Task }>()
 </script>
 
 <template>
-  <div>
-    <span class="font-semibold mr-2">{{ task.id }}</span>
+  <NuxtLink :to="{ name: 'tasks-taskId', params: { taskId: task.id } }">
     <span>{{ task.title }}</span>
-  </div>
+  </NuxtLink>
 </template>
