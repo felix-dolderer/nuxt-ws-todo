@@ -40,14 +40,12 @@ export async function getTaskWithSubtasks(peer: Peer, { id }: TaskId) {
 
 async function addTask(peer: Peer, addTaskData: AddTaskData) {
   const addedTask = await dbAddTask(addTaskData)
-  if (!addedTask) return
   publishTaskMessage({ topic: TOPICS.TASKS.ADD, data: addedTask }, peer)
 }
 
 async function updateTask(peer: Peer, task: Task) {
   const existingTask = await dbGetTask(task.id)
   const updatedTask = await dbUpdateTask(task)
-  if (!updatedTask) return
   publishTaskMessage({ topic: TOPICS.TASKS.ID.UPDATE, data: updatedTask }, peer)
 
   if (existingTask.parentTaskId) {
@@ -69,7 +67,6 @@ async function updateTask(peer: Peer, task: Task) {
 
 async function deleteTask(peer: Peer, { id }: TaskId) {
   const deletedTask = await dbDeleteTask(id)
-  if (!deletedTask) return
   publishTaskMessage({ topic: TOPICS.TASKS.ID.DELETE, data: deletedTask }, peer)
 
   if (deletedTask.parentTaskId) {

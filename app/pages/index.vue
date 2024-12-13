@@ -2,7 +2,7 @@
 // #region Imports
 import { useWebSocket } from "@vueuse/core"
 import { COMMANDS, TOPICS } from "~~/schemas"
-import type { AddTaskData, Task } from "~~/schemas/tasks"
+import type { AddTaskData, Task, TaskId } from "~~/schemas/tasks"
 import { tasksTopicSchema } from "~~/schemas/tasks"
 // #endregion Imports
 
@@ -60,7 +60,7 @@ function updateTask(task: Task) {
   send(JSON.stringify(command.data))
 }
 
-function deleteTask({ id }: Task) {
+function deleteTask({ id }: TaskId) {
   const command = _buildTasksCommand({
     command: COMMANDS.TASKS.ID.DELETE,
     data: { id },

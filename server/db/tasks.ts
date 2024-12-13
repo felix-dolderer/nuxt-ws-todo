@@ -43,10 +43,9 @@ export async function dbGetTaskWithSubtasks(
   }
 }
 
-export async function dbAddTask(
-  addTaskData: AddTaskData,
-): Promise<Task | undefined> {
+export async function dbAddTask(addTaskData: AddTaskData): Promise<Task> {
   const inserted = await db.insert(tasksTable).values(addTaskData).returning()
+  if (!inserted[0]) throw new Error()
   return inserted[0]
 }
 
@@ -55,20 +54,21 @@ export async function dbUpdateTask({
   title,
   done,
   parentTaskId,
-}: Task): Promise<Task | undefined> {
+}: Task): Promise<Task> {
   const updated = await db
     .update(tasksTable)
     .set({ title, done, parentTaskId })
     .where(eq(tasksTable.id, id))
     .returning()
+  if (!updated[0]) throw new Error()
   return updated[0]
 }
 
-export async function dbDeleteTask(id: number): Promise<Task | undefined> {
+export async function dbDeleteTask(id: number): Promise<Task> {
   const deleted = await db
     .delete(tasksTable)
     .where(eq(tasksTable.id, id))
     .returning()
-
+  if (!deleted[0]) throw new Error()
   return deleted[0]
 }
