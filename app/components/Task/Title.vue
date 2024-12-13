@@ -36,7 +36,7 @@ taskTitle.value.title = task.title
       v-if="!editing"
       class="font-semibold text-2xl h-10"
     >
-      {{ task.title }}
+      <TaskTitleLink :task="task" />
       <UButton
         variant="subtle"
         color="neutral"
