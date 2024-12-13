@@ -8,7 +8,7 @@ const saving = ref(false)
 
 function updateTask() {
   saving.value = true
-  emits("updateTask", { ...task, done: !task.done })
+  emits("updateTask", { ...task, done: false })
 }
 
 watch(
@@ -19,9 +19,9 @@ watch(
 
 <template>
   <UButton
-    :label="task.done ? 'Restore' : 'Complete'"
-    :color="task.done ? 'neutral' : 'success'"
-    :icon="task.done ? 'i-lucide-archive-restore' : 'i-lucide-circle-check-big'"
+    label="Restore"
+    color="neutral"
+    icon="i-lucide-archive-restore"
     :loading="saving"
     variant="subtle"
     @click="updateTask"

@@ -2,10 +2,12 @@
 // #region Imports
 
 import type { TableColumn } from "@nuxt/ui"
-import type { Task } from "~~/schemas/tasks"
+import type { Task, TaskId } from "~~/schemas/tasks"
 
 const UButton = resolveComponent("UButton")
-const TaskCompleteRestoreButton = resolveComponent("TaskCompleteRestoreButton")
+const DeleteButton = resolveComponent("TaskButtonDelete")
+const CompleteButton = resolveComponent("TaskButtonComplete")
+const RestoreButton = resolveComponent("TaskButtonRestore")
 
 // #endregion Imports
 
@@ -13,7 +15,7 @@ const TaskCompleteRestoreButton = resolveComponent("TaskCompleteRestoreButton")
 
 const emits = defineEmits<{
   updateTask: [task: Task]
-  deleteTask: [task: Task]
+  deleteTask: [task: TaskId]
 }>()
 
 const { tasks } = defineProps<{ tasks: Task[] }>()
@@ -55,10 +57,6 @@ const sortedColumnHeader: TableColumn<Task>["header"] = ({ column }) => {
 
 const columns: TableColumn<Task>[] = [
   {
-    accessorKey: "id",
-    header: sortedColumnHeader,
-  },
-  {
     accessorKey: "title",
     id: "Title",
     header: sortedColumnHeader,
@@ -84,39 +82,44 @@ const columns: TableColumn<Task>[] = [
     },
     cell: ({ row: { original: task } }) => {
       const elementId = `tasksTableTask-${task.id}`
-      return h(TaskCompleteRestoreButton, {
+      const onUpdateTask = async (updatedTask: Task) => {
+        if (
+          statusFilter.value !== "All" &&
+          task.done !== updatedTask.done &&
+          ((updatedTask.done && statusFilter.value === "Open") ||
+            (statusFilter.value === "Done" && !updatedTask.done))
+        ) {
+          await fadeOutRow(elementId)
+        }
+        emits("updateTask", updatedTask)
+      }
+      if (!task.done) {
+        return h(CompleteButton, {
+          id: elementId,
+          task,
+          onUpdateTask,
+        })
+      }
+      return h(RestoreButton, {
         id: elementId,
         task,
-        onUpdateTask: async (task: Task) => {
-          if (statusFilter.value !== "All") {
-            await fadeOutRow(elementId)
-          }
-          emits("updateTask", task)
-        },
+        onUpdateTask,
       })
     },
   },
   {
     accessorKey: "id",
     header: "",
-    cell: ({ row }) => {
-      const task = row.original
+    cell: ({ row: { original: task } }) => {
       const elementId = `tasksTableTask-${task.id}`
-
-      return h(
-        UButton,
-        {
-          id: elementId,
-          variant: "subtle",
-          color: "error",
-          icon: "i-lucide-trash",
-          onClick: async () => {
-            await fadeOutRow(elementId)
-            emits("deleteTask", task)
-          },
+      return h(DeleteButton, {
+        id: elementId,
+        task,
+        onDeleteTask: async (task: TaskId) => {
+          await fadeOutRow(elementId)
+          emits("deleteTask", task)
         },
-        () => "Delete",
-      )
+      })
     },
   },
 ]
