@@ -6,7 +6,7 @@
     "@vueuse/core": "^12.0.0",
     "@vueuse/motion": "^2.2.6",
     "@vueuse/router": "^12.0.0",
-    "drizzle-orm": "^0.38.1",
+    "drizzle-orm": "^0.38.2",
     "nuxt": "^3.14.1592",
     "pg": "^8.13.1",
     "vue": "latest",
@@ -31,7 +31,7 @@
   ],
   "devDependencies": {
     "@types/pg": "^8.11.10",
-    "drizzle-kit": "^0.30.0",
+    "drizzle-kit": "^0.30.1",
     "prettier": "^3.4.2",
     "tsx": "^4.19.2"
   }
