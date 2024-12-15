@@ -108,6 +108,15 @@ function updateTask(task: Task) {
   send(JSON.stringify(command.data))
 }
 
+function deleteTask(task: TaskId) {
+  const command = _buildTasksCommand({
+    command: COMMANDS.TASKS.ID.DELETE,
+    data: task,
+  })
+  if (!command.success) return
+  send(JSON.stringify(command.data))
+}
+
 function removeSubtask(subtask: TaskId) {
   if (!task.value) return
   task.value.subtasks = task.value?.subtasks.filter(
@@ -127,6 +136,7 @@ onBeforeUnmount(close)
     <TaskDetails
       :task="task"
       @update-task="updateTask"
+      @delete-task="deleteTask"
     />
     <h2
       v-if="task.subtasks.length > 0"
@@ -148,6 +158,7 @@ onBeforeUnmount(close)
         <TaskDetails
           :task="subtask"
           @update-task="updateTask"
+          @delete-task="deleteTask"
         />
       </UCard>
     </div>
