@@ -26,14 +26,16 @@ const parentTask = computed(() =>
 )
 const selectableTasks = computed(() => {
   const tasks: Task[] = [
-    ...(availableTasks.data.value?.filter((at) => at.id !== task.id) || []),
+    ...(availableTasks.data.value?.filter(
+      (availableTask) => availableTask.id !== task.id,
+    ) || []),
   ]
   tasks.unshift(emptyTask)
   return tasks
 })
 
 function updateTask() {
-  if ([task.id, task.parentTaskId, 0].includes(selectedParentTask.value.id)) {
+  if ([task.id, task.parentTaskId].includes(selectedParentTask.value.id)) {
     return reset()
   }
 
@@ -89,7 +91,7 @@ watch(() => task.parentTaskId, reset)
         v-model:search-term="searchTerm"
         :items="selectableTasks"
         :loading="availableTasks.status.value !== 'success'"
-        :filter="false"
+        :ignore-filter="true"
         class="flex-1"
       >
         <TaskTitleLink

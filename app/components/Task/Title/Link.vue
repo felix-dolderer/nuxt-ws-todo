@@ -5,7 +5,11 @@ defineProps<{ task: Task }>()
 </script>
 
 <template>
-  <NuxtLink :to="{ name: 'tasks-taskId', params: { taskId: task.id } }">
+  <span v-if="task.id == 0">{{ task.title }}</span>
+  <NuxtLink
+    v-else
+    :to="{ name: 'tasks-taskId', params: { taskId: task.id } }"
+  >
     <span>{{ task.title }}</span>
   </NuxtLink>
 </template>
