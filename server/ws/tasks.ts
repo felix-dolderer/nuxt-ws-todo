@@ -44,13 +44,21 @@ async function addTask(peer: Peer, addTaskData: AddTaskData) {
 }
 
 async function updateTask(peer: Peer, task: Task) {
+  if ((task.parentTaskId ?? 0) < 1) {
+    task.parentTaskId = null
+  }
   const existingTask = await dbGetTask(task.id)
+  if (existingTask.parentTaskId !== task.parentTaskId) {
+    if (await hasCircularReference(task)) {
+      throw new Error()
+    }
+  }
   const updatedTask = await dbUpdateTask(task)
   publishTaskMessage({ topic: TOPICS.TASKS.ID.UPDATE, data: updatedTask }, peer)
 
   if (existingTask.parentTaskId) {
     publishTaskMessage(
-      { topic: TOPICS.TASKS.ID.UPDATE, data: existingTask },
+      { topic: TOPICS.TASKS.ID.UPDATE, data: updatedTask },
       peer,
       existingTask.parentTaskId,
     )
@@ -76,6 +84,16 @@ async function deleteTask(peer: Peer, { id }: TaskId) {
       deletedTask.parentTaskId,
     )
   }
+}
+
+async function hasCircularReference(task: Task, childTaskIds: number[] = []) {
+  if (!task.parentTaskId) return false
+
+  if (childTaskIds.includes(task.parentTaskId)) return true
+
+  childTaskIds.push(task.id)
+  const parentTask = await dbGetTask(task.parentTaskId)
+  return hasCircularReference(parentTask, childTaskIds)
 }
 
 function publishTaskMessage(
