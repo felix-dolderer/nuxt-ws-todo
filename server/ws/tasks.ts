@@ -58,7 +58,7 @@ async function updateTask(peer: Peer, task: Task) {
 
   if (existingTask.parentTaskId) {
     publishTaskMessage(
-      { topic: TOPICS.TASKS.ID.UPDATE, data: existingTask },
+      { topic: TOPICS.TASKS.ID.UPDATE, data: updatedTask },
       peer,
       existingTask.parentTaskId,
     )
