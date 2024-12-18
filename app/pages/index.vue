@@ -3,7 +3,6 @@
 import { useWebSocket } from "@vueuse/core"
 import { COMMANDS, TOPICS } from "~~/schemas"
 import type { AddTaskData, Task, TaskId } from "~~/schemas/tasks"
-import { tasksTopicSchema } from "~~/schemas/tasks"
 // #endregion Imports
 
 // #region State
@@ -11,33 +10,24 @@ const tasks = ref<Task[]>([])
 // #endregion State
 
 // #region WebSockets
-const { host } = useRequestURL()
-const { data, close, send } = useWebSocket(`ws://${host}/api/ws/tasks`)
+const { data, close, send } = useWebSocket(
+  `ws://${useRequestURL().host}/api/ws/tasks`
+)
 
-watch(data, () => {
-  if (!(data.value instanceof Blob)) return
+watch(data, async () => {
+  const msg = await taskMessageParser(data.value)
 
-  const reader = new FileReader()
-  reader.onload = () => {
-    const msgOptional = tasksTopicSchema.safeParse(
-      JSON.parse(reader.result?.toString() || ""),
+  if (msg.topic === TOPICS.TASKS.GET) {
+    tasks.value = msg.data
+  } else if (msg.topic === TOPICS.TASKS.ADD) {
+    tasks.value = [...tasks.value, msg.data]
+  } else if (msg.topic === TOPICS.TASKS.ID.UPDATE) {
+    tasks.value = tasks.value.map((task) =>
+      task.id === msg.data.id ? msg.data : task,
     )
-    if (!msgOptional.success) return
-    const msg = msgOptional.data
-
-    if (msg.topic === TOPICS.TASKS.GET) {
-      tasks.value = msg.data
-    } else if (msg.topic === TOPICS.TASKS.ADD) {
-      tasks.value = [...tasks.value, msg.data]
-    } else if (msg.topic === TOPICS.TASKS.ID.UPDATE) {
-      tasks.value = tasks.value.map((task) =>
-        task.id === msg.data.id ? msg.data : task,
-      )
-    } else if (msg.topic === TOPICS.TASKS.ID.DELETE) {
-      tasks.value = tasks.value.filter((task) => task.id !== msg.data.id)
-    }
+  } else if (msg.topic === TOPICS.TASKS.ID.DELETE) {
+    tasks.value = tasks.value.filter((task) => task.id !== msg.data.id)
   }
-  reader.readAsText(data.value)
 })
 // #endregion WebSockets
 

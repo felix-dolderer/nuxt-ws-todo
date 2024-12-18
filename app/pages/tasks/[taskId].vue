@@ -9,7 +9,6 @@ import type {
   TaskId,
   TaskWithSubtasks,
 } from "~~/schemas/tasks"
-import { tasksTopicSchema } from "~~/schemas/tasks"
 // #endregion Imports
 
 definePageMeta({
@@ -26,65 +25,51 @@ const fetchedTask = await $fetch(`/api/rest/tasks/${taskId.value}`)
 const task = ref<TaskWithSubtasks>(fetchedTask)
 
 // #region WebSockets
-const { host } = useRequestURL()
 const { data, send, close } = useWebSocket(
-  `ws://${host}/api/ws/tasks/${taskId.value}`,
+  `ws://${useRequestURL().host}/api/ws/tasks/${taskId.value}`
 )
 
-watch(data, () => {
-  if (!(data.value instanceof Blob)) return
+watch(data, async () => {
+  const msg = await taskMessageParser(data.value)
 
-  const reader = new FileReader()
-  reader.onload = () => {
-    const msgOptional = tasksTopicSchema.safeParse(
-      JSON.parse(reader.result?.toString() || ""),
-    )
-    if (!msgOptional.success) return
-    const msg = msgOptional.data
+  if (msg.topic === TOPICS.TASKS.ID.GET) {
+    task.value = msg.data
+  } else if (msg.topic === TOPICS.TASKS.ADD) {
+    task.value.subtasks.push(msg.data)
+  } else if (msg.topic === TOPICS.TASKS.ID.UPDATE) {
+    // If the update is for the task itself
+    if (task.value.id === msg.data.id) {
+      // Update the task.
+      task.value = { ...task.value, ...msg.data }
+    }
 
-    if (msg.topic === TOPICS.TASKS.ID.GET) {
-      task.value = msg.data
-    } else if (msg.topic === TOPICS.TASKS.ADD) {
-      task.value.subtasks.push(msg.data)
-    } else if (msg.topic === TOPICS.TASKS.ID.UPDATE) {
-      // If the update is for the task itself
-      if (task.value.id === msg.data.id) {
-        // Update the task.
-        task.value = {
-          ...task.value,
-          ...msg.data,
-        }
-      }
-
-      // The update is for a subtask.
-      else {
-        // Remove a subtask.
-        if (msg.data.parentTaskId !== task.value.id) {
-          removeSubtask(msg.data)
-        }
-        // Update a subtask.
-        else if (task.value.subtasks.some(({ id }) => id === msg.data.id)) {
-          task.value.subtasks = task.value.subtasks.map((subtask) =>
-            subtask.id === msg.data.id ? msg.data : subtask,
-          )
-        }
-        // Add a subtask.
-        else {
-          task.value.subtasks.push(msg.data)
-        }
-      }
-    } else if (msg.topic === TOPICS.TASKS.ID.DELETE) {
-      // If the task is deleted
-      if (task.value.id === msg.data.id) {
-        // TODO: Do something useful.
-      }
-      // If a subtask is deleted
-      else {
+    // The update is for a subtask.
+    else {
+      // Remove a subtask.
+      if (msg.data.parentTaskId !== task.value.id) {
         removeSubtask(msg.data)
       }
+      // Update a subtask.
+      else if (task.value.subtasks.some(({ id }) => id === msg.data.id)) {
+        task.value.subtasks = task.value.subtasks.map((subtask) =>
+          subtask.id === msg.data.id ? msg.data : subtask,
+        )
+      }
+      // Add a subtask.
+      else {
+        task.value.subtasks.push(msg.data)
+      }
+    }
+  } else if (msg.topic === TOPICS.TASKS.ID.DELETE) {
+    // If the task is deleted
+    if (task.value.id === msg.data.id) {
+      // TODO: Do something useful.
+    }
+    // If a subtask is deleted
+    else {
+      removeSubtask(msg.data)
     }
   }
-  reader.readAsText(data.value)
 })
 // #endregion WebSockets
 
