@@ -25,22 +25,31 @@ export const tasksWsMessageHandler = (peer: Peer, rawMessage: Message) => {
 }
 
 export async function getTasks(peer: Peer) {
-  peer.send({
-    topic: TOPICS.TASKS.GET,
-    data: await dbGetTasks(),
-  })
+  peer.send(
+    tasksTopicSchema.parse({
+      topic: TOPICS.TASKS.GET,
+      data: await dbGetTasks(),
+      peerId: peer.id,
+    }),
+  )
 }
 
 export async function getTaskWithSubtasks(peer: Peer, { id }: TaskId) {
-  peer.send({
-    topic: TOPICS.TASKS.ID.GET,
-    data: await dbGetTaskWithSubtasks(id),
-  })
+  peer.send(
+    tasksTopicSchema.parse({
+      topic: TOPICS.TASKS.ID.GET,
+      data: await dbGetTaskWithSubtasks(id),
+      peerId: peer.id,
+    }),
+  )
 }
 
 async function addTask(peer: Peer, addTaskData: AddTaskData) {
   const addedTask = await dbAddTask(addTaskData)
-  publishTaskMessage({ topic: TOPICS.TASKS.ADD, data: addedTask }, peer)
+  publishTaskMessage(
+    { topic: TOPICS.TASKS.ADD, data: addedTask, peerId: peer.id },
+    peer,
+  )
 }
 
 async function updateTask(peer: Peer, task: Task) {
@@ -54,11 +63,14 @@ async function updateTask(peer: Peer, task: Task) {
     }
   }
   const updatedTask = await dbUpdateTask(task)
-  publishTaskMessage({ topic: TOPICS.TASKS.ID.UPDATE, data: updatedTask }, peer)
+  publishTaskMessage(
+    { topic: TOPICS.TASKS.ID.UPDATE, data: updatedTask, peerId: peer.id },
+    peer,
+  )
 
   if (existingTask.parentTaskId) {
     publishTaskMessage(
-      { topic: TOPICS.TASKS.ID.UPDATE, data: updatedTask },
+      { topic: TOPICS.TASKS.ID.UPDATE, data: updatedTask, peerId: peer.id },
       peer,
       existingTask.parentTaskId,
     )
@@ -66,7 +78,7 @@ async function updateTask(peer: Peer, task: Task) {
 
   if (updatedTask.parentTaskId) {
     publishTaskMessage(
-      { topic: TOPICS.TASKS.ID.UPDATE, data: updatedTask },
+      { topic: TOPICS.TASKS.ID.UPDATE, data: updatedTask, peerId: peer.id },
       peer,
       updatedTask.parentTaskId,
     )
@@ -75,11 +87,14 @@ async function updateTask(peer: Peer, task: Task) {
 
 async function deleteTask(peer: Peer, { id }: TaskId) {
   const deletedTask = await dbDeleteTask(id)
-  publishTaskMessage({ topic: TOPICS.TASKS.ID.DELETE, data: deletedTask }, peer)
+  publishTaskMessage(
+    { topic: TOPICS.TASKS.ID.DELETE, data: deletedTask, peerId: peer.id },
+    peer,
+  )
 
   if (deletedTask.parentTaskId) {
     publishTaskMessage(
-      { topic: TOPICS.TASKS.ID.DELETE, data: deletedTask },
+      { topic: TOPICS.TASKS.ID.DELETE, data: deletedTask, peerId: peer.id },
       peer,
       deletedTask.parentTaskId,
     )

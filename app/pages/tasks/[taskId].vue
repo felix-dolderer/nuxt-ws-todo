@@ -34,6 +34,7 @@ watch(data, async () => {
 
   if (msg.topic === TOPICS.TASKS.ID.GET) {
     task.value = msg.data
+    peerId.value = msg.peerId
   } else if (msg.topic === TOPICS.TASKS.ADD) {
     task.value.subtasks.push(msg.data)
   } else if (msg.topic === TOPICS.TASKS.ID.UPDATE) {

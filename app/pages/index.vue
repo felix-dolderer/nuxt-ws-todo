@@ -19,6 +19,7 @@ watch(data, async () => {
 
   if (msg.topic === TOPICS.TASKS.GET) {
     tasks.value = msg.data
+    peerId.value = msg.peerId
   } else if (msg.topic === TOPICS.TASKS.ADD) {
     tasks.value = [...tasks.value, msg.data]
   } else if (msg.topic === TOPICS.TASKS.ID.UPDATE) {

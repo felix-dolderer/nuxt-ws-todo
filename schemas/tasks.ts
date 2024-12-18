@@ -83,26 +83,31 @@ export const tasksCommandSchema = z.union([
 const topicTasksGetSchema = z.object({
   topic: z.literal(TASKS_TOPICS.GET),
   data: z.array(taskSchema),
+  peerId: z.string(),
 })
 
 const topicTasksGetIdSchema = z.object({
   topic: z.literal(TASKS_TOPICS.ID.GET),
   data: taskWithSubtasksSchema,
+  peerId: z.string(),
 })
 
 const topicTasksAddSchema = z.object({
   topic: z.literal(TASKS_TOPICS.ADD),
   data: taskSchema,
+  peerId: z.string(),
 })
 
 const topicTasksUpdateSchema = z.object({
   topic: z.literal(TASKS_TOPICS.ID.UPDATE),
   data: taskSchema,
+  peerId: z.string(),
 })
 
 const topicTasksDeleteSchema = z.object({
   topic: z.literal(TASKS_TOPICS.ID.DELETE),
   data: taskIdSchema,
+  peerId: z.string(),
 })
 
 export const tasksTopicSchema = z.union([
@@ -112,3 +117,4 @@ export const tasksTopicSchema = z.union([
   topicTasksUpdateSchema,
   topicTasksDeleteSchema,
 ])
+export type TaskTopicMessage = z.infer<typeof tasksTopicSchema>
