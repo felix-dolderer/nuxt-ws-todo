@@ -11,6 +11,8 @@ export type StatusFilter = (typeof statusFilterOptions)[number]
 
 export const peerId = ref<string>()
 
+export const latestUpdatePeerId = ref<string>()
+
 export const taskMessageParser = (
   wsMessage: any,
 ): Promise<TaskTopicMessage> => {

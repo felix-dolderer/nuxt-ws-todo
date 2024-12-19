@@ -26,12 +26,13 @@ const task = ref<TaskWithSubtasks>(fetchedTask)
 
 // #region WebSockets
 const { data, send, close } = useWebSocket(
-  `ws://${useRequestURL().host}/api/ws/tasks/${taskId.value}`
+  `ws://${useRequestURL().host}/api/ws/tasks/${taskId.value}`,
 )
 
 watch(data, async () => {
   const msg = await taskMessageParser(data.value)
 
+  latestUpdatePeerId.value = msg.peerId
   if (msg.topic === TOPICS.TASKS.ID.GET) {
     task.value = msg.data
     peerId.value = msg.peerId

@@ -25,7 +25,14 @@ function reset() {
   taskTitle.value.title = task.title
 }
 
-watch(() => task.title, reset)
+watch(
+  () => task.title,
+  () => {
+    if (latestUpdatePeerId.value == peerId.value) {
+      reset()
+    }
+  },
+)
 
 taskTitle.value.title = task.title
 </script>
