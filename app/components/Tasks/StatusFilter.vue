@@ -6,12 +6,10 @@ const statusFilter = defineModel<StatusFilter>({
 </script>
 
 <template>
-  <div class="block h-8">
-    <USelect
-      v-model="statusFilter"
-      icon="i-lucide-filter"
-      :items="[...statusFilterOptions]"
-      class="w-48 float-right block clear-both"
-    />
-  </div>
+  <USelect
+    v-model="statusFilter"
+    class="w-60 block"
+    icon="i-lucide-filter"
+    :items="[...statusFilterOptions]"
+  />
 </template>

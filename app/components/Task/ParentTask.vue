@@ -70,7 +70,9 @@ watch(() => task.parentTaskId, reset)
         />
         <p v-else>{{ task.parentTaskId }}</p>
       </div>
-      <p v-else><em>No parentTaskId</em></p>
+      <p v-else>
+        <em>{{ emptyTask.title }}</em>
+      </p>
       <UButton
         variant="subtle"
         color="neutral"

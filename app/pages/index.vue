@@ -70,7 +70,6 @@ onBeforeUnmount(close)
 
 <template>
   <div>
-    <TasksAdd @add-task="addTask" />
     <TasksTable
       :tasks="tasks"
       @delete-task="deleteTask"

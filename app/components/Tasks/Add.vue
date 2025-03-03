@@ -42,7 +42,7 @@ function focusAddTaskInput() {
       :schema="addTaskDataSchema.or(z.object({ title: z.literal('') }))"
       :state="newTask"
       @submit.prevent="addTask"
-      class="w-full mb-8"
+      class="w-full"
     >
       <UFormField name="title">
         <UButtonGroup class="w-full">

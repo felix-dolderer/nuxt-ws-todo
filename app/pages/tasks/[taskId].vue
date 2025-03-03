@@ -79,9 +79,8 @@ watch(data, async () => {
 function addTask(addTaskData: AddTaskData) {
   const command = _buildTasksCommand({
     command: COMMANDS.TASKS.ADD,
-    data: addTaskData,
+    data: { ...addTaskData, parentTaskId: task.value.id },
   })
-  console.log(command)
   if (!command.success) return
   send(JSON.stringify(command.data))
 }
@@ -125,29 +124,12 @@ onBeforeUnmount(close)
       @update-task="updateTask"
       @delete-task="deleteTask"
     />
-    <h2
-      v-if="task.subtasks.length > 0"
-      class="font-semibold text-xl mt-8"
-    >
-      Subtasks
-    </h2>
-    <div class="flex flex-wrap">
-      <UCard class="m-4 flex-auto">
-        <TasksAdd
-          :parent-task-id="taskId"
-          @add-task="addTask"
-        />
-      </UCard>
-      <UCard
-        v-for="subtask in task.subtasks"
-        class="m-4 flex-auto"
-      >
-        <TaskDetails
-          :task="subtask"
-          @update-task="updateTask"
-          @delete-task="deleteTask"
-        />
-      </UCard>
-    </div>
+    <h2 class="font-semibold text-xl mt-8 mb-4">Subtasks</h2>
+    <TasksTable
+      :tasks="task.subtasks"
+      @add-task="addTask"
+      @delete-task="deleteTask"
+      @update-task="updateTask"
+    />
   </div>
 </template>

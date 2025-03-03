@@ -2,7 +2,7 @@
 // #region Imports
 
 import type { TableColumn } from "@nuxt/ui"
-import type { Task, TaskId } from "~~/schemas/tasks"
+import type { AddTaskData, Task, TaskId } from "~~/schemas/tasks"
 
 const UButton = resolveComponent("UButton")
 const DeleteButton = resolveComponent("TaskButtonDelete")
@@ -14,6 +14,7 @@ const RestoreButton = resolveComponent("TaskButtonRestore")
 // #region Component Composition
 
 const emits = defineEmits<{
+  addTask: [task: AddTaskData]
   updateTask: [task: Task]
   deleteTask: [task: TaskId]
 }>()
@@ -136,7 +137,16 @@ const columnFilters = computed(() => [
 
 <template>
   <div>
-    <TasksStatusFilter v-model="statusFilter" />
+    <div class="flex gap-4 flex-wrap">
+      <TasksAdd
+        class="grow"
+        @add-task="(addTask) => $emit('addTask', addTask)"
+      />
+      <TasksStatusFilter
+        class="flex-1 md:flex-initial"
+        v-model="statusFilter"
+      />
+    </div>
     <ClientOnly>
       <UTable
         id="tasksTable"
