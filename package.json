@@ -1,14 +1,14 @@
 {
   "name": "nuxt-app",
   "dependencies": {
-    "@iconify-json/lucide": "^1.2.28",
-    "@nuxt/ui": "^3.0.0-alpha.8",
+    "@iconify-json/lucide": "^1.2.32",
+    "@nuxt/ui": "^3.0.1",
     "@vueuse/core": "^13.0.0",
-    "@vueuse/motion": "^2.2.6",
+    "@vueuse/motion": "^3.0.3",
     "@vueuse/router": "^13.0.0",
-    "drizzle-orm": "^0.40.0",
-    "nuxt": "^3.15.4",
-    "pg": "^8.13.3",
+    "drizzle-orm": "^0.41.0",
+    "nuxt": "^3.16.1",
+    "pg": "^8.14.1",
     "vue": "latest",
     "vue-router": "latest",
     "zod": "^3.24.2"
@@ -35,5 +35,5 @@
     "prettier": "^3.5.3",
     "tsx": "^4.19.3"
   },
-  "packageManager": "bun@1.2.5"
+  "packageManager": "bun@1.2.6"
 }
