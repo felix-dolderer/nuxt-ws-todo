@@ -6,7 +6,7 @@
     "@vueuse/core": "^13.0.0",
     "@vueuse/motion": "^3.0.3",
     "@vueuse/router": "^13.0.0",
-    "drizzle-orm": "^0.43.1",
+    "drizzle-orm": "^0.44.2",
     "nuxt": "^3.16.1",
     "pg": "^8.14.1",
     "vue": "latest",
