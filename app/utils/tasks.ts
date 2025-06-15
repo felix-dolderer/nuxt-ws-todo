@@ -16,7 +16,13 @@ export const latestUpdatePeerId = ref<string>()
 export const taskMessageParser = (
   wsMessage: any,
 ): Promise<TaskTopicMessage> => {
-  if (!(wsMessage instanceof Blob)) {
+  if (typeof wsMessage == "string") {
+    return new Promise((resolve, reject) => {
+      const parsedMsg = tasksTopicSchema.safeParse(JSON.parse(wsMessage))
+      if (!parsedMsg.success) return reject()
+      resolve(parsedMsg.data)
+    })
+  } else if (!(wsMessage instanceof Blob)) {
     return new Promise((_, reject) => reject)
   }
 
