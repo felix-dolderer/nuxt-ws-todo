@@ -16,26 +16,17 @@ export const latestUpdatePeerId = ref<string>()
 export const taskMessageParser = (
   wsMessage: any,
 ): Promise<TaskTopicMessage> => {
-  if (typeof wsMessage == "string") {
-    return new Promise((resolve, reject) => {
-      const parsedMsg = tasksTopicSchema.safeParse(JSON.parse(wsMessage))
-      if (!parsedMsg.success) return reject()
-      resolve(parsedMsg.data)
-    })
-  } else if (!(wsMessage instanceof Blob)) {
-    return new Promise((_, reject) => reject)
-  }
-
-  const reader = new FileReader()
-  reader.readAsText(wsMessage)
-
   return new Promise((resolve, reject) => {
-    reader.onload = () => {
-      const parsedMsg = tasksTopicSchema.safeParse(
-        JSON.parse(reader.result?.toString() || ""),
-      )
+    const parseAndValidate = (jsonStr: string) => {
+      const parsedMsg = tasksTopicSchema.safeParse(JSON.parse(jsonStr))
       if (!parsedMsg.success) return reject()
       resolve(parsedMsg.data)
     }
+
+    if (typeof wsMessage == "string") return parseAndValidate(wsMessage)
+    if (!(wsMessage instanceof Blob)) return reject()
+    const reader = new FileReader()
+    reader.readAsText(wsMessage)
+    reader.onload = () => parseAndValidate(reader.result?.toString() || "")
   })
 }
