@@ -7,7 +7,5 @@ export default defineWebSocketHandler({
     getTasks(peer)
   },
   message: tasksWsMessageHandler,
-  close(peer) {
-    peer.unsubscribe(TOPICS.TASKS.CHANNEL)
-  },
+  close: (peer) => peer.unsubscribe(TOPICS.TASKS.CHANNEL),
 })
