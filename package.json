@@ -11,7 +11,7 @@
     "pg": "^8.16.0",
     "vue": "latest",
     "vue-router": "latest",
-    "zod": "^3.25.64"
+    "zod": "^4.1.1"
   },
   "private": true,
   "scripts": {
