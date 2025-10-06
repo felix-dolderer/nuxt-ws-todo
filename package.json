@@ -2,7 +2,7 @@
   "name": "nuxt-app",
   "dependencies": {
     "@iconify-json/lucide": "^1.2.66",
-    "@nuxt/ui": "^3.3.3",
+    "@nuxt/ui": "^4.0.1",
     "@vueuse/core": "^13.9.0",
     "@vueuse/motion": "^3.0.3",
     "@vueuse/router": "^13.9.0",
