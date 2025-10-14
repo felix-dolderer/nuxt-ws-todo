@@ -1,6 +1,7 @@
 import {
   boolean,
   foreignKey,
+  index,
   integer,
   pgTable,
   varchar,
@@ -13,13 +14,13 @@ export const tasksTable = pgTable(
     title: varchar({ length: 255 }).notNull(),
     done: boolean().notNull().default(false),
     parentTaskId: integer(),
+    deleted: boolean().notNull().default(false),
   },
   (t) => [
-    {
-      parentTask: foreignKey({
-        columns: [t.parentTaskId],
-        foreignColumns: [t.id],
-      }),
-    },
+    foreignKey({
+      columns: [t.parentTaskId],
+      foreignColumns: [t.id],
+    }),
+    index("deleted_index").on(t.deleted),
   ],
 )

@@ -1,0 +1,2 @@
+ALTER TABLE "tasks" ADD CONSTRAINT "tasks_parentTaskId_tasks_id_fk" FOREIGN KEY ("parentTaskId") REFERENCES "public"."tasks"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "deleted_index" ON "tasks" USING btree ("deleted");

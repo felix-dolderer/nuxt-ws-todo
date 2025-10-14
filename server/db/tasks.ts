@@ -1,4 +1,4 @@
-import { eq, ilike } from "drizzle-orm"
+import { and, eq, ilike } from "drizzle-orm"
 import type { AddTaskData, Task, TaskWithSubtasks } from "~~/schemas/tasks"
 import { db } from "./connection"
 import { tasksTable } from "./schema"
@@ -8,7 +8,12 @@ export async function dbGetTasks(options?: GetTasksOptions): Promise<Task[]> {
   const tasks = await db
     .select()
     .from(tasksTable)
-    .where(ilike(tasksTable.title, `%${options?.query || ""}%`))
+    .where(
+      and(
+        ilike(tasksTable.title, `%${options?.query || ""}%`),
+        eq(tasksTable.deleted, false),
+      ),
+    )
     .orderBy(tasksTable.id)
   return tasks
 }
@@ -17,7 +22,7 @@ export async function dbGetTask(id: number): Promise<Task> {
   const taskRes = await db
     .select()
     .from(tasksTable)
-    .where(eq(tasksTable.id, id))
+    .where(and(eq(tasksTable.id, id), eq(tasksTable.deleted, false)))
   if (!taskRes[0]) throw new Error()
 
   return taskRes[0]
@@ -29,13 +34,13 @@ export async function dbGetTaskWithSubtasks(
   const taskRes = await db
     .select()
     .from(tasksTable)
-    .where(eq(tasksTable.id, id))
+    .where(and(eq(tasksTable.id, id), eq(tasksTable.deleted, false)))
   if (!taskRes[0]) throw new Error()
   const task = taskRes[0]
   const subtasks = await db
     .select()
     .from(tasksTable)
-    .where(eq(tasksTable.parentTaskId, id))
+    .where(and(eq(tasksTable.parentTaskId, id), eq(tasksTable.deleted, false)))
 
   return {
     ...task,
@@ -58,7 +63,7 @@ export async function dbUpdateTask({
   const updated = await db
     .update(tasksTable)
     .set({ title, done, parentTaskId })
-    .where(eq(tasksTable.id, id))
+    .where(and(eq(tasksTable.id, id), eq(tasksTable.deleted, false)))
     .returning()
   if (!updated[0]) throw new Error()
   return updated[0]
@@ -66,8 +71,9 @@ export async function dbUpdateTask({
 
 export async function dbDeleteTask(id: number): Promise<Task> {
   const deleted = await db
-    .delete(tasksTable)
-    .where(eq(tasksTable.id, id))
+    .update(tasksTable)
+    .set({ deleted: true })
+    .where(and(eq(tasksTable.id, id), eq(tasksTable.deleted, false)))
     .returning()
   if (!deleted[0]) throw new Error()
   return deleted[0]
