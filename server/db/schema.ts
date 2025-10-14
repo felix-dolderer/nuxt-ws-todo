@@ -13,6 +13,7 @@ export const tasksTable = pgTable(
     title: varchar({ length: 255 }).notNull(),
     done: boolean().notNull().default(false),
     parentTaskId: integer(),
+    deleted: boolean().notNull().default(false),
   },
   (t) => [
     {
