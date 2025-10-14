@@ -45,7 +45,7 @@ function focusAddTaskInput() {
       class="w-full"
     >
       <UFormField name="title">
-        <UButtonGroup class="w-full">
+        <UFieldGroup class="w-full">
           <UInput
             ref="addTaskInput"
             v-model="newTask.title"
@@ -63,7 +63,7 @@ function focusAddTaskInput() {
             variant="subtle"
             label="Add Task"
           />
-        </UButtonGroup>
+        </UFieldGroup>
       </UFormField>
     </UForm>
   </div>
