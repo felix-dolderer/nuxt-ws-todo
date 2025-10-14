@@ -2,6 +2,7 @@ import { and, eq, ilike } from "drizzle-orm"
 import type { AddTaskData, Task, TaskWithSubtasks } from "~~/schemas/tasks"
 import { db } from "./connection"
 import { tasksTable } from "./schema"
+import { dbAddAuditLog } from "./auditLogs"
 
 type GetTasksOptions = { query?: string }
 export async function dbGetTasks(options?: GetTasksOptions): Promise<Task[]> {
@@ -49,9 +50,17 @@ export async function dbGetTaskWithSubtasks(
 }
 
 export async function dbAddTask(addTaskData: AddTaskData): Promise<Task> {
-  const inserted = await db.insert(tasksTable).values(addTaskData).returning()
-  if (!inserted[0]) throw new Error()
-  return inserted[0]
+  return await db.transaction(async (tx) => {
+    const inserted = await tx.insert(tasksTable).values(addTaskData).returning()
+    if (!inserted[0]) throw new Error()
+    await dbAddAuditLog(tx, {
+      resourceType: "task",
+      resourceId: inserted[0].id,
+      action: "create",
+      data: inserted[0],
+    })
+    return inserted[0]
+  })
 }
 
 export async function dbUpdateTask({
@@ -60,21 +69,37 @@ export async function dbUpdateTask({
   done,
   parentTaskId,
 }: Task): Promise<Task> {
-  const updated = await db
-    .update(tasksTable)
-    .set({ title, done, parentTaskId })
-    .where(and(eq(tasksTable.id, id), eq(tasksTable.deleted, false)))
-    .returning()
-  if (!updated[0]) throw new Error()
-  return updated[0]
+  return await db.transaction(async (tx) => {
+    const updated = await tx
+      .update(tasksTable)
+      .set({ title, done, parentTaskId })
+      .where(and(eq(tasksTable.id, id), eq(tasksTable.deleted, false)))
+      .returning()
+    if (!updated[0]) throw new Error()
+    await dbAddAuditLog(tx, {
+      resourceType: "task",
+      resourceId: id,
+      action: "update",
+      data: updated[0],
+    })
+    return updated[0]
+  })
 }
 
 export async function dbDeleteTask(id: number): Promise<Task> {
-  const deleted = await db
-    .update(tasksTable)
-    .set({ deleted: true })
-    .where(and(eq(tasksTable.id, id), eq(tasksTable.deleted, false)))
-    .returning()
-  if (!deleted[0]) throw new Error()
-  return deleted[0]
+  return await db.transaction(async (tx) => {
+    const deleted = await tx
+      .update(tasksTable)
+      .set({ deleted: true })
+      .where(and(eq(tasksTable.id, id), eq(tasksTable.deleted, false)))
+      .returning()
+    if (!deleted[0]) throw new Error()
+    await dbAddAuditLog(tx, {
+      resourceType: "task",
+      resourceId: id,
+      action: "delete",
+      data: deleted[0],
+    })
+    return deleted[0]
+  })
 }
